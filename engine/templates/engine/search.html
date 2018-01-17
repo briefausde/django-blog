@@ -1,0 +1,53 @@
+{% extends 'engine/base.html' %}
+
+{% block content %}
+<style>
+.textInput{border:1px solid rgba(0,0,0,.15);padding:0 5px;height:35px;font-size:14px;outline:0;background:rgba(221, 221, 221, 0);-webkit-appearance:none;-moz-appearance:none;appearance:none;box-sizing:border-box;border-radius:4px;font-family:medium-ui-sans-serif-text-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;letter-spacing:0;font-weight:400;font-style:normal}.textInputLabel{display:table-cell;vertical-align:middle;height:35px;font-size:14px;box-sizing:border-box;font-family:medium-ui-sans-serif-text-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;letter-spacing:0;font-weight:700;font-style:normal}.textInput:invalid{box-shadow:none}.textInput--textarea{padding:15px;margin:15px 0 30px;resize:none;width:100%;height:50px;overflow:hidden}.textInput--textarea:focus{outline:0}.textInput--fullWidth{width:100%}.textInput--narrow{width:255px}.textInput--width50{width:50px}.textInput--large{font-size:18px;height:40px;margin:10px auto;overflow:hidden;padding:7px;width:500px;white-space:nowrap;font-family:medium-ui-sans-serif-text-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;letter-spacing:0;font-weight:300;font-style:normal}.textInput--jumbo{font-family:medium-ui-sans-serif-text-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;letter-spacing:0;font-weight:300;font-style:normal;font-size:50px;height:80px;padding:0;width:100%}.textInput--transparent{background:0 0}@media all and (max-width:767px){.textInput--jumbo{font-size:32px;height:50px}.textInput--narrow{width:175px;height:32px;padding:0 10px}}.textInput--rounded{border-radius:999em}.textInput--transparent{background:0 0}.textInput--darkText{color:rgba(0,0,0,.8)}.textInput--chromeless{border:0;padding:0;outline:0;height:auto;background:0 0}.textInput--underlined{border:0;border-bottom:1px solid rgba(0,0,0,.15);border-radius:0}.inputGroup{position:relative}.inputGroup .textInput:not(.textInput--narrow){width:100%;box-sizing:border-box}.inputGroup--text{text-align:left;width:100%;margin-bottom:10px}.inputGroup--text>.inputGroup-title{color:rgba(0,0,0,.44);font-size:14px}.inputGroup--text>.textInput{margin:0}.inputGroup-description{margin-top:15px;margin-bottom:25px;font-size:16px;color:rgba(0,0,0,.44)}.label--radio .inputGroup-description{margin-left:30px}.inputGroup .svgIcon{top:-1px;position:relative}.metabar .inputGroup.inputGroup--selection{margin-top:15px;margin-bottom:10px;text-align:left}.inputGroup--selection .inputGroup-description{position:relative;margin-left:30px;margin-bottom:15px;font-size:12px;color:rgba(0,0,0,.6)}.inputGroup--selection .inputGroup-description--last{margin-bottom:0}.inputGroup--selection .button--small{margin-top:10px}.inputGroup--error>.textInput{border-color:#cc5454}.inputGroup--error>.inputGroup-title{color:#cc5454}.inputGroup--success>.textInput{border-color:rgba(0,0,0,.15)}
+</style>
+
+<center>
+<div style="margin-top:100px;width:50%">
+    <form method="POST" class="search-form" id="search">{% csrf_token %}
+    <input class="js-searchInput textInput textInput--jumbo textInput--underlined u-marginBottom40" type="search" id="searchText" placeholder="Search" value="{{ search_text }}" maxlength="300">
+    </form>
+    {% if text == 1 %}<br><br>We can't find you'r query<br><br>
+    {% endif %}
+    {% if text == 2 %}<br><br>Search query should be from 3 to 120 charachters<br><br>
+    {% endif %}
+</div>
+</center>
+
+<script>
+$(document).ready(function(){
+    $("#search").submit(function(event){
+      event.preventDefault();
+      var searchText = document.getElementById('searchText').value;
+      window.location = "/search/1/?q=" + searchText;
+    });
+});
+</script>
+
+<div class="wrap">
+    <div id="main" role="main">
+        <ul id="tiles">
+            {% block content_posts %}
+            {% endblock %}
+        </ul>
+    </div>
+</div>
+
+{% if query %}
+<p class="type-centered homepage-see-more">
+    {% if posts.has_previous %}
+    <a href="{% url 'find_word_pages' pk=posts.previous_page_number %}?q={{ query }}">previous</a> |
+    {% endif %}
+    page {{ posts.number }} of {% if posts.number != posts.paginator.num_pages %}
+    <a href="{% url 'find_word_pages' pk=posts.paginator.num_pages %}?q={{ query }}">{{ posts.paginator.num_pages }}</a>
+    {% else %}{{ posts.paginator.num_pages }} | <a href="{% url 'find_word_pages' pk=1 %}?q={{ query }}">first page</a>{% endif %}
+    {% if posts.has_next %}
+    | <a href="{% url 'find_word_pages' pk=posts.next_page_number %}?q={{ query }}">next</a>
+    {% endif %}
+</p>
+{% endif %}
+
+{% endblock %}

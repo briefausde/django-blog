@@ -1,0 +1,10 @@
+.idea
+db.sqlite3
+*.jpg
+*.png
+*.pyc
+*.log
+engine/migrations/*
+engine/migrations
+djangosite/settings.py
+
