@@ -1,0 +1,15 @@
+{% extends 'engine/base.html' %}
+
+{% block content %}
+<div class="content">
+	<div class="wrap">
+        <div id="main" role="main">
+            <ul id="tiles">
+                {% for log in logs %}
+                <p>[{{ log.date }}] User {{ log.user }} ({{ log.ip }}) call {{ log.path }} {% if log.data %}with data: {{ log.data }}{% endif %}</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

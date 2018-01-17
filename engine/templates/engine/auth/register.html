@@ -1,0 +1,29 @@
+{% extends 'engine/base_wrap.html' %}
+
+{% block content_ww %}
+  <h2>Sign up</h2>
+<div class="table-form">
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="color: grey">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <button type="submit">Sign up</button>
+  </form>
+</div>
+
+<a href="{% url 'auth:login' %}">Если у вас уже есть аккаунт, вы можете ввойти</a>
+
+{% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
+{% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}
+
+{% endblock %}

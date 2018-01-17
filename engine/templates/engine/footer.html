@@ -1,0 +1,9 @@
+{% block content %}
+<div class="footer">
+    {% if user.is_staff %}
+    <a href="/admin/">admin panel</a>
+    {% else %}
+    <p>click on me</p>
+    {% endif %}
+</div>
+{% endblock %}
