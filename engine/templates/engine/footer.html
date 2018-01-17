@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% block content %}
 <div class="footer">
     {% if user.is_staff %}
@@ -7,3 +8,14 @@
     {% endif %}
 </div>
 {% endblock %}
+=======
+{% block content %}
+<div class="footer">
+    {% if user.is_staff %}
+    <a href="/admin/">admin panel</a>
+    {% else %}
+    <p>click on me</p>
+    {% endif %}
+</div>
+{% endblock %}
+>>>>>>> 64d5b50a23ee4bd33e7ebc3854e494618345a6e9

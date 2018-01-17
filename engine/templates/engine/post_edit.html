@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'engine/base_wrap.html' %}
 
 {% block content_ww %}
@@ -9,3 +10,16 @@
 </form>
 </div>
 {% endblock %}
+=======
+{% extends 'engine/base_wrap.html' %}
+
+{% block content_ww %}
+<h1>New post</h1>
+<div class="table-form">
+<form method="POST" class="post-form">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="submit">
+</form>
+</div>
+{% endblock %}
+>>>>>>> 64d5b50a23ee4bd33e7ebc3854e494618345a6e9

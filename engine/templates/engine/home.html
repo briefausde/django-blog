@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'engine/base.html' %}
 
 {% block content %}
@@ -14,3 +15,21 @@
     </div>
 </div>
 {% endblock %}
+=======
+{% extends 'engine/base.html' %}
+
+{% block content %}
+<div class="content" style="margin-top:-30px">
+	<div class="wrap">
+        <div id="main" role="main">
+            {% include 'engine/user.html' %}
+            <ul id="tiles">
+                {% block content_posts %}
+                {% endblock %}
+            </ul>
+        </div>
+        {% include 'engine/paginator.html' %}
+    </div>
+</div>
+{% endblock %}
+>>>>>>> 64d5b50a23ee4bd33e7ebc3854e494618345a6e9

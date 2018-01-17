@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% block content %}
 <div class="header">
 	<div class="wrap">
@@ -58,3 +59,65 @@ $(".HeaderSearch").click(search);
 });
 </script>
 {% endblock %}
+=======
+{% block content %}
+<div class="header">
+	<div class="wrap">
+		<div class="logo">
+			<a href="/"><img src="http://www.gardencentreguide.ie/data/site_5/files/images/logo%20Garden%20Connect.jpg" width="154px" height="52px" title="pinbal" /></a>
+		</div>
+		<div class="nav-icon">
+			<a href="#" class="right_bt" id="activator"><span> </span> </a>
+		</div>
+		<div class="box" id="box">
+			<div class="box_content">
+				<div class="box_content_center">
+					<div class="form_content">
+						<div class="menu_box_list">
+							<ul>
+								<li><a href="/"><span>Home</span></a></li>
+								<li><a href="{% url 'load_static_page' page_name='about' %}"><span>About</span></a></li>
+								<li><a href="{% url 'load_static_page' page_name='history' %}"><span>History</span></a></li>
+								<li><a href="{% url 'get_from_category' category_name='news' %}"><span>News</span></a></li>
+								{% if user.is_authenticated %}<li><a href="{% url 'auth:logout' %}"><span>Logout</span></a></li>{% endif %}
+								<div class="clear"> </div>
+							</ul>
+						</div>
+						<a class="boxclose" id="boxclose"> <span> </span></a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="top-searchbar">
+			<form>
+				<input type="text" id="HeaderSearchText" placeholder="Search...." />
+				<input type="submit" class="HeaderSearch" value="" />
+			</form>
+		</div>
+		<div class="userinfo">
+			<div class="user">
+				<ul>
+					{% if user.is_authenticated %}
+					<li><a href="{% url 'user_profile' username=request.user %}"><img src="http://thegardenwests.com.au/wp-content/uploads/2016/06/The-Garden-Restaurant-West-Ashfield-Site-Icon-Green.png" width="43px" height="43px" title="user-name" />{{ request.user }}</a></li>
+					{% else %}
+					<li><a href="{% url 'auth:login' %}"><img src="http://thegardenwests.com.au/wp-content/uploads/2016/06/The-Garden-Restaurant-West-Ashfield-Site-Icon-Green.png" width="43px" height="43px" title="user-name" />Login/Reg</a></li>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+		<div class="clear"> </div>
+	</div>
+</div>
+
+<script>
+$(document).ready(function(){
+function search(event){
+	event.preventDefault();
+	var HeaderSearchText = document.getElementById('HeaderSearchText').value;
+	document.location.href = "/search/1/?q=" + HeaderSearchText;
+}
+$(".HeaderSearch").click(search);
+});
+</script>
+{% endblock %}
+>>>>>>> 64d5b50a23ee4bd33e7ebc3854e494618345a6e9

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'engine/base_wrap.html' %}
 
 {% block content_ww %}
@@ -14,3 +15,21 @@
 {% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
 {% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}
 {% endblock %}
+=======
+{% extends 'engine/base_wrap.html' %}
+
+{% block content_ww %}
+<h1>Login</h1>
+<div class="table-form">
+<form method="POST" class="auth-form">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="save btn btn-default">Save</button>
+</form>
+</div>
+
+<a href="{% url 'auth:register' %}">Если у вас нет аккаунта, вы можете зарегистрароваться</a>
+
+{% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
+{% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}
+{% endblock %}
+>>>>>>> 64d5b50a23ee4bd33e7ebc3854e494618345a6e9

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% if user_profile %}
 <div class="row">
     <div class="feature-box">
@@ -15,3 +16,22 @@
     </div>
 </div>
 {% endif %}
+=======
+{% if user_profile %}
+<div class="row">
+    <div class="feature-box">
+        <div class="story-teaser_banner">
+            <div class="story-teaser_image">
+                <img src="" style="width:100%;height:246px">
+            </div>
+            <div class="story-details story-teaser_text">
+                <h3 class="heading-standard"><a href="{% url 'user_profile' username=user_profile %}">{{ user_profile }}{% if request.user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
+                <em class="story-detail_subtitle">joined {{ user_profile.date_joined }} | last login {{ user_profile.last_login }}</em>
+                <p>You can contact with me in mail. My mail you can see in down</p>
+                <p>Contact - {{ user_profile.email }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+>>>>>>> 64d5b50a23ee4bd33e7ebc3854e494618345a6e9
