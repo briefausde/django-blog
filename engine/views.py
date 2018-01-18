@@ -1,11 +1,14 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.utils import timezone
 from .models import Post, Log, Category, Comment, StaticPage
 from django.contrib.auth.models import User
 from .classes import search
 from .forms import CommentForm
+from django.views import generic
 
 # оптимизация базы
 # выключить debug
@@ -15,10 +18,6 @@ from .forms import CommentForm
 # from django.core.cache import cache
 # cache.clear()
 # @cache_page(120, key_prefix="main")
-
-# for post in Post.objects.all():
-#     if post.pk not in [57, 44, 69, 39, 63]:
-#         post.delete()
 
 
 category_list = ""
@@ -44,25 +43,10 @@ def reload(request):
     return redirect('main')
 
 
-def get_logs(request):
-    if not request.user.is_superuser:
-        logs_add(request)
-        return HttpResponse('You are not admin')
-    logs = Log.objects.all().order_by('-date')[0:500]
-    return render(request, 'engine/logs.html', {'logs': logs})
-
-
 def logs_add(request, data=""):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
     import datetime
     Log.objects.create(ip=ip, user=request.user, path=request.path, data=data, date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # make for timezone django time
-
-
-def get_posts(category):
-    if (category == "all") or (category not in category_list):
-        return Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
-    else:
-        return Post.objects.filter(category=Category.objects.get(name=category), published_date__lte=timezone.now()).order_by('category', '-published_date')
 
 
 def get_paginator_posts(posts, pk, count):
@@ -74,15 +58,32 @@ def get_paginator_posts(posts, pk, count):
     return posts
 
 
-def main(request):
-    logs_add(request)
-    return render(request, 'engine/post_list.html', {'posts': get_paginator_posts(get_posts("all"), 1, 15)})
+def get_posts(category_name):
+    if (category_name == "all") or (category_name not in category_list):
+        return Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+    else:
+        return Post.objects.filter(category__name=category_name, published_date__lte=timezone.now()).order_by('category',
+                                                                                                             '-published_date')
 
 
-def category_page(request, category_name, pk=1):
-    logs_add(request)
-    return render(request, 'engine/post_list.html', {'posts': get_paginator_posts(get_posts(category_name), pk, 15),
-                                                     'category': category_name})
+class PostsListView(generic.ListView):
+    model = Post
+    context_object_name = 'posts'
+    template_name = 'engine/post_list.html'
+
+    def get_context_data(self, **kwargs):
+        logs_add(self.request)
+        context = super(PostsListView, self).get_context_data(**kwargs)
+        category = self.kwargs.get('category_name', 'all')
+        pk = self.kwargs.get('pk', 1)
+        if category != "all" or pk != 1:
+            context['category'] = category
+        return context
+
+    def get_queryset(self):
+        category = self.kwargs.get('category_name', 'all')
+        pk = self.kwargs.get('pk', 1)
+        return get_paginator_posts(get_posts(category), pk, 15)
 
 
 def load_static_page(request, page_name):
@@ -117,9 +118,13 @@ def user_profile(request, username, pk=1):
     return render(request, 'engine/post_list.html', {'posts': get_paginator_posts(posts, pk, 9), 'user_profile': user})
 
 
-def get_comments(request, post_id):
-    comments = Comment.objects.filter(post=Post.objects.get(pk=post_id)).order_by('-pk')
-    return render(request, 'engine/comments.html', {'comments': comments})
+class CommentsListView(generic.ListView):
+    model = Comment
+    context_object_name = 'comments'
+    template_name = 'engine/comments.html'
+
+    def get_queryset(self):
+        return Comment.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
 def add_comment(request, post_id):
@@ -144,3 +149,37 @@ def remove_comment(request):
         if user == comment.author or user.is_staff:
             comment.delete()
     return redirect('/')
+
+
+class StaffRequiredMixin(LoginRequiredMixin):
+    raise_exception = True
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return self.handle_no_permission()
+        return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
+class LogsListView(StaffRequiredMixin, generic.ListView):
+    model = Log
+    context_object_name = 'logs'
+    template_name = 'engine/logs.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(LogsListView, self).get_context_data(**kwargs)
+        logs_add(self.request)
+        # context['some_data'] = 'This is just some data'
+        # if self.request.user.is_staff:
+        return context
+        # else:
+        #     raise PermissionDenied
+
+    def get_queryset(self):
+        return Log.objects.all().order_by('-date')[0:500]
+
+
+# про запретить доступ
+# как сделать listview для user_profile и post_list  т.д. у них шаблон один и тот же
+# from django.contrib.auth.decorators import user_passes_test
+# @user_passes_test(lambda u: u.is_superuser)
+# запретить доставать комменты с /comments/id get запросом, только лишь post

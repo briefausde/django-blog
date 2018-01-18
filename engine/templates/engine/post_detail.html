@@ -4,7 +4,7 @@
 <script type="text/javascript">
     function updateComments() {
         $.ajax({
-            url: "{% url 'get_comments' post.pk %}",
+            url: "{% url 'comments' post.pk %}",
             cache: false,
             success: function(html){
                 $("#comments").html(html);
