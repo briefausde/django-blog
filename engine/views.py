@@ -134,7 +134,7 @@ def add_comment(request, post_id):
             comment.save()
             return redirect('/')
 
-
+# this is test
 def remove_comment(request):
     if request.method == "POST":
         print(request.body)
