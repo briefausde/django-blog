@@ -201,3 +201,4 @@ def remove_comment(request):
 # from django.contrib.auth.decorators import user_passes_test
 # @user_passes_test(lambda u: u.is_superuser)
 # запретить доставать комменты с /comments/id get запросом, только лишь post
+#
