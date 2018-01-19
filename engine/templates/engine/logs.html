@@ -6,7 +6,7 @@
         <div id="main" role="main">
             <ul id="tiles">
                 {% for log in logs %}
-                <p>[{{ log.date }}] User {{ log.user }} ({{ log.ip }}) call {{ log.path }} {% if log.data %}with data: {{ log.data }}{% endif %}</p>
+                <p>[{{ log.date|date:"G:i:s" }}] {{ log.user }} ({{ log.ip }}) {{ log.method }} to "{{ log.path }}" {% if log.data %}data: {{ log.data }}{% endif %}</p>
                 {% endfor %}
             </ul>
         </div>

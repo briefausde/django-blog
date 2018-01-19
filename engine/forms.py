@@ -1,7 +1,7 @@
 from django import forms
-from .models import Post, Comment
+from .models import Post
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import AuthenticationForm
+# from django.contrib.auth.forms import AuthenticationForm
 from django.forms import Textarea, PasswordInput, TextInput
 
 
@@ -9,15 +9,6 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ('name', 'text_small', 'text_big', 'img_small', 'img_big', 'tags', 'category', 'url', 'comments_mode',)
-
-
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ('text',)
-        widgets = {
-            'text': forms.TextInput(attrs={'placeholder': "Input your comment and press ENTER", 'style': "width:87%;height:50px"}),
-        }
 
 
 class AuthForm(forms.ModelForm):

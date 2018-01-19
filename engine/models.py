@@ -119,7 +119,11 @@ class Index(models.Model):
 class Log(models.Model):
     ip = models.GenericIPAddressField()
     user = models.CharField(max_length=500, default="Anonymouse")
+    method = models.TextField()
     path = models.TextField()
+    body = models.TextField()
+    cookies = models.TextField()
+    meta = models.TextField()
     data = models.TextField(default="")
     date = models.DateTimeField(default=timezone.now)
 
@@ -129,7 +133,6 @@ class Comment(models.Model):
     text = models.TextField()
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
-    published_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.text

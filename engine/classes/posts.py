@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from ..models import Post, Comment
-from ..forms import PostForm, CommentForm
+from ..models import Post
+from ..forms import PostForm
+from ..views import logs_add
 # from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from random import randint
 from re import sub
 
@@ -14,6 +15,7 @@ def refactor_url(text):
 
 
 def upd(request, form):
+    logs_add(request)
     post = form.save(commit=False)
     post.author = request.user
     post.published_date = timezone.now()
@@ -30,6 +32,7 @@ def upd(request, form):
 
 @login_required(login_url='/auth/login/')
 def new(request):  # добавить функцию в модель поста
+    logs_add(request)
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
@@ -41,6 +44,7 @@ def new(request):  # добавить функцию в модель поста
 
 @login_required(login_url='/auth/login/')
 def edit(request, pk):
+    logs_add(request)
     post = get_object_or_404(Post, pk=pk)
     if request.user != post.author:
         return redirect('post_detail', pk=post.pk)
@@ -54,12 +58,9 @@ def edit(request, pk):
 
 
 def detail(request, name):
+    logs_add(request)
     post = get_object_or_404(Post, url=refactor_url(name))
     Post.objects.filter(pk=post.pk).update(views=(post.views + 1))
     from math import floor
     time = floor(len(post.text_big) * 0.075 / 60)
-    form = CommentForm
-    # comments = Comment.objects.filter(article_id=post.pk,
-    #                                   published_date__lte=timezone.now()).order_by('article_id', '-published_date')
-    return render(request, 'engine/post_detail.html', {'post': post, 'read_time': time, 'views': post.views,
-                                                       'form': form})
+    return render(request, 'engine/post_detail.html', {'post': post, 'read_time': time, 'views': post.views})

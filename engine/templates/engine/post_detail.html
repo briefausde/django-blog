@@ -59,7 +59,7 @@
 	                		<div class="table-form">
 								{% if post.comments_mode %}
 	                    		<form  id="form" method="POST" name="post_comment" onsubmit="getAjax()" action="javascript:void(null);">{% csrf_token %}
-	                        		{{ form.as_p }}
+                                    <textarea id="id_text" class="form-control" placeholder="Input your comment and press ENTER" name="text" style="width:87%;height:50px"></textarea>
 									<script type="text/javascript">
 	                    				function getAjax() {
 	                        				var textComment   = $('#form').serialize();

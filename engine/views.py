@@ -1,13 +1,14 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpResponse, Http404
 from django.utils import timezone
+# from django.utils.decorators import method_decorator
 from .models import Post, Log, Category, Comment, StaticPage
 from django.contrib.auth.models import User
 from .classes import search
-from .forms import CommentForm
 from django.views import generic
 
 # оптимизация базы
@@ -46,7 +47,15 @@ def reload(request):
 def logs_add(request, data=""):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
     import datetime
-    Log.objects.create(ip=ip, user=request.user, path=request.path, data=data, date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # make for timezone django time
+    Log.objects.create(ip=ip,
+                       user=request.user,
+                       method=request.method,
+                       path=request.path,
+                       body=str(request.body).strip(),
+                       cookies=str(request.COOKIES),
+                       meta=str(request.META),
+                       data=str(data).strip(),
+                       date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # make for timezone django time
 
 
 def get_paginator_posts(posts, pk, count):
@@ -127,23 +136,24 @@ class CommentsListView(generic.ListView):
         return Comment.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
+@login_required(login_url='/auth/login/')
 def add_comment(request, post_id):
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = User.objects.get(
-                username=request.user) if request.user.is_authenticated else User.objects.get(username="Anonymous")
-            comment.post = Post.objects.get(pk=post_id)
-            comment.published_date = timezone.now()
+    if request.POST:
+        post = get_object_or_404(Post, pk=post_id)
+        text = request.POST.get('text')
+        text = text.strip()
+        logs_add(request, text)
+        if text != '':
+            comment = Comment.objects.create(author=request.user, text=text, post=post, created_date=timezone.now())
             comment.save()
-            return redirect('/')
+    return redirect('/')
 
 
+@login_required(login_url='/auth/login/')
 def remove_comment(request):
     if request.method == "POST":
-        print(request.body)
         comment_id = str(request.body).split("=")[2][0:-1]
+        logs_add(request, comment_id)
         user = request.user
         comment = get_object_or_404(Comment, pk=comment_id)
         if user == comment.author or user.is_staff:
@@ -160,6 +170,7 @@ class StaffRequiredMixin(LoginRequiredMixin):
         return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
+classmethod(login_required(login_url='/auth/login/'))
 class LogsListView(StaffRequiredMixin, generic.ListView):
     model = Log
     context_object_name = 'logs'
