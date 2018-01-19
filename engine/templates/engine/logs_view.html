@@ -1,0 +1,28 @@
+{% extends 'engine/base.html' %}
+
+{% block content %}
+<script type="text/javascript">
+    function updateLogs() {
+        $.ajax({
+            url: "{% url 'logs' %}",
+            cache: false,
+            success: function(html){
+                $("#logs").html(html);
+            }
+        });
+    }
+    $(document).ready(function(){
+        updateLogs();
+        setInterval('updateLogs()', 1000);
+    });
+</script>
+<div class="content">
+	<div class="wrap">
+        <div id="main" role="main">
+            <ul id="tiles">
+                <div id="logs"></div>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,15 +1,5 @@
-{% extends 'engine/base.html' %}
-
-{% block content %}
-<div class="content">
-	<div class="wrap">
-        <div id="main" role="main">
-            <ul id="tiles">
-                {% for log in logs %}
-                <p>[{{ log.date|date:"G:i:s" }}] {{ log.user }} ({{ log.ip }}) {{ log.method }} to "{{ log.path }}" {% if log.data %}data: {{ log.data }}{% endif %}</p>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</div>
+{% block logs %}
+    {% for log in logs %}
+        <p><a href="{% url "view_logs" log.pk %}">[{{ log.date|date:"G:i:s" }}] {{ log.user }} ({{ log.ip }}) {{ log.method }} to "{{ log.path }}" {% if log.data %}data: {{ log.data }}{% endif %}</a></p>
+    {% endfor %}
 {% endblock %}

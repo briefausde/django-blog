@@ -38,7 +38,7 @@ except:
 def reload(request):
     logs_add(request)
     if not request.user.is_superuser:
-        return HttpResponse('You are not admin')
+        return redirect("main")
     search.delete_indexes()
     search.create_indexes()
     return redirect('main')
@@ -56,6 +56,43 @@ def logs_add(request, data=""):
                        meta=str(request.META),
                        data=str(data).strip(),
                        date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # make for timezone django time
+
+
+# view_logs detailview
+def view_logs(request, pk=0):
+    logs_add(request)
+    print(pk)
+    if request.user.is_staff:
+        if pk == "0":
+            return render(request, 'engine/logs_view.html')
+        else:
+            log = get_object_or_404(Log, pk=pk)
+            return render(request, 'engine/logs_detail.html', {'log': log})
+    return redirect("main")
+
+
+class StaffRequiredMixin(LoginRequiredMixin):
+    raise_exception = True
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return self.handle_no_permission()
+        return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
+classmethod(login_required(login_url='/auth/login/'))
+class LogsListView(StaffRequiredMixin, generic.ListView):
+    model = Log
+    context_object_name = 'logs'
+    template_name = 'engine/logs.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(LogsListView, self).get_context_data(**kwargs)
+        # context['some_data'] = 'This is just some data'
+        return context
+
+    def get_queryset(self):
+        return Log.objects.all().order_by('-date')[0:500]
 
 
 def get_paginator_posts(posts, pk, count):
@@ -161,36 +198,6 @@ def remove_comment(request):
     return redirect('/')
 
 
-class StaffRequiredMixin(LoginRequiredMixin):
-    raise_exception = True
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            return self.handle_no_permission()
-        return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
-
-
-classmethod(login_required(login_url='/auth/login/'))
-class LogsListView(StaffRequiredMixin, generic.ListView):
-    model = Log
-    context_object_name = 'logs'
-    template_name = 'engine/logs.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(LogsListView, self).get_context_data(**kwargs)
-        logs_add(self.request)
-        # context['some_data'] = 'This is just some data'
-        # if self.request.user.is_staff:
-        return context
-        # else:
-        #     raise PermissionDenied
-
-    def get_queryset(self):
-        return Log.objects.all().order_by('-date')[0:500]
-
-
-# про запретить доступ
-# как сделать listview для user_profile и post_list  т.д. у них шаблон один и тот же
 # from django.contrib.auth.decorators import user_passes_test
 # @user_passes_test(lambda u: u.is_superuser)
 # запретить доставать комменты с /comments/id get запросом, только лишь post
