@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
-from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import LoginRequiredMixin
+# from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
-from django.http import HttpResponse, Http404
+# from django.http import HttpResponse, Http404
 from django.utils import timezone
 # from django.utils.decorators import method_decorator
 from .models import Post, Log, Category, Comment, StaticPage
@@ -61,7 +61,6 @@ def logs_add(request, data=""):
 # view_logs detailview
 def view_logs(request, pk=0):
     logs_add(request)
-    print(pk)
     if request.user.is_staff:
         if pk == "0":
             return render(request, 'engine/logs_view.html')
@@ -80,7 +79,6 @@ class StaffRequiredMixin(LoginRequiredMixin):
         return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
-classmethod(login_required(login_url='/auth/login/'))
 class LogsListView(StaffRequiredMixin, generic.ListView):
     model = Log
     context_object_name = 'logs'
@@ -108,8 +106,8 @@ def get_posts(category_name):
     if (category_name == "all") or (category_name not in category_list):
         return Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
     else:
-        return Post.objects.filter(category__name=category_name, published_date__lte=timezone.now()).order_by('category',
-                                                                                                             '-published_date')
+        return Post.objects.filter(category__name=category_name,
+                                   published_date__lte=timezone.now()).order_by('category', '-published_date')
 
 
 class PostsListView(generic.ListView):
@@ -152,7 +150,9 @@ def find_word(request, pk=1):
 
     posts = search.find(word)
     if posts:
-        return render(request, 'engine/post_list.html', {'posts': get_paginator_posts(posts, pk, 15), 'query': word, 'search_text': word})
+        return render(request, 'engine/post_list.html', {'posts': get_paginator_posts(posts, pk, 15),
+                                                         'query': word,
+                                                         'search_text': word})
     else:
         return render(request, 'engine/search.html', {'search_text': word, 'text': 1})
 
@@ -201,4 +201,3 @@ def remove_comment(request):
 # from django.contrib.auth.decorators import user_passes_test
 # @user_passes_test(lambda u: u.is_superuser)
 # запретить доставать комменты с /comments/id get запросом, только лишь post
-#
