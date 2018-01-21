@@ -1,6 +1,5 @@
 from django.conf.urls import url, include
 from . import views
-from .classes import auth, posts
 from .models import EngineSitemap
 from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth.forms import UserCreationForm
@@ -17,11 +16,11 @@ sitemaps = {
 }
 
 auth_urlpatterns = [
-    url(r'^login/$', auth.login, name='login'),
-    url(r'^register/$', (CreateView.as_view(model=User, get_success_url=auth.register, form_class=UserCreationForm,
+    url(r'^login/$', views.login, name='login'),
+    url(r'^register/$', (CreateView.as_view(model=User, get_success_url=views.register, form_class=UserCreationForm,
                                             template_name="engine/auth/register.html")), name='register'),
-    url(r'^logout/$', auth.logout, name='logout'),
-    url(r'^change_password/$', auth.change_password, name='change_password'),
+    url(r'^logout/$', views.logout, name='logout'),
+    url(r'^change_password/$', views.change_password, name='change_password'),
     # from django.contrib.auth import views as auth_views
     # url(r'^accounts/login/$', auth_views.LoginView.as_view(template_name='engine/auth/login.html')),
 ]
@@ -30,9 +29,9 @@ urlpatterns = [
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     url(r'^$', views.PostsListView.as_view(), name='main'),
     # url(r'^view/(?P<pk>[0-9]+)/$', views.post_detail, name='post_detail'),
-    url(r'^post/new/$', posts.new, name='post_new'),
-    url(r'^edit/(?P<pk>[0-9]+)/$', posts.edit, name='post_edit'),
-    url(r'^article/(?P<name>[-\w]+)$', posts.detail, name='post_detail'),
+    url(r'^post/new/$', views.post_new, name='post_new'),
+    url(r'^edit/(?P<pk>[0-9]+)/$', views.post_edit, name='post_edit'),
+    url(r'^article/(?P<name>[-\w]+)$', views.post_detail, name='post_detail'),
     url(r'^(?P<category_name>%s)/$' % categories_list,
         views.PostsListView.as_view(),
         name='get_from_category'),

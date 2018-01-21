@@ -54,8 +54,7 @@ class Post(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
         # Post.objects.filter(url=self.url).update(url="band")
-        from .classes import search
-        search.add_index(self.pk)
+        # add_index(self.pk)
 
     def __str__(self):
         return self.name
