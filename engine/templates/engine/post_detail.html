@@ -43,7 +43,7 @@
 					<ul>
 						<li><a href="{% url 'user_profile' username=post.author %}">Added {{ post.author }}</a></li>
 						<li><a href="">Read {{ read_time }} minutes</a></li>
-						<li><a href="">{{ views }} views</a></li>
+						<li><a href="">{{ post.views }} views</a></li>
 						<li><a href="{% url 'post_edit' pk=post.pk %}">{{ post.published_date }}</a></li>
 					</ul>
 				</div>

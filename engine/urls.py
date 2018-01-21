@@ -31,7 +31,7 @@ urlpatterns = [
     # url(r'^view/(?P<pk>[0-9]+)/$', views.post_detail, name='post_detail'),
     url(r'^post/new/$', views.post_new, name='post_new'),
     url(r'^edit/(?P<pk>[0-9]+)/$', views.post_edit, name='post_edit'),
-    url(r'^article/(?P<name>[-\w]+)$', views.post_detail, name='post_detail'),
+    url(r'^article/(?P<name>[-\w]+)$', views.PostDetailsView.as_view(), name='post_detail'),
     url(r'^(?P<category_name>%s)/$' % categories_list,
         views.PostsListView.as_view(),
         name='get_from_category'),

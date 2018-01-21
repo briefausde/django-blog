@@ -306,13 +306,24 @@ def post_edit(request, pk):
     return render(request, 'engine/post_edit.html', {'form': form})
 
 
-def post_detail(request, name):
-    logs_add(request)
-    post = get_object_or_404(Post, url=refactor_url(name))
-    Post.objects.filter(pk=post.pk).update(views=(post.views + 1))
-    from math import floor
-    time = floor(len(post.text_big) * 0.075 / 60)
-    return render(request, 'engine/post_detail.html', {'post': post, 'read_time': time, 'views': post.views})
+class PostDetailsView(generic.DetailView):
+    model = Post
+    context_object_name = 'post'
+    template_name = 'engine/post_detail.html'
+
+    def get_context_data(self, **kwargs):
+        logs_add(self.request)
+        post = self.get_object()
+        Post.objects.filter(pk=post.pk).update(views=(post.views + 1))
+        context = super(PostDetailsView, self).get_context_data()
+        from math import floor
+        time = floor(len(post.text_big) * 0.075 / 60)
+        context['read_time'] = time
+        context['user'] = self.request.user
+        return context
+
+    def get_object(self):
+        return get_object_or_404(Post, url=refactor_url(self.kwargs['name']))
 
 
 def delete_indexes():
