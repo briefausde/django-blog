@@ -11,10 +11,12 @@ from django.contrib.auth.models import User
 from .classes import search
 from django.views import generic
 
+# from django.contrib.auth.decorators import user_passes_test
+# @user_passes_test(lambda u: u.is_superuser)
+# запретить доставать комменты с /comments/id get запросом, только лишь post
 # оптимизация базы
 # выключить debug
 # cache
-
 # from django.views.decorators.cache import cache_page
 # from django.core.cache import cache
 # cache.clear()
@@ -196,8 +198,3 @@ def remove_comment(request):
         if user == comment.author or user.is_staff:
             comment.delete()
     return redirect('/')
-
-
-# from django.contrib.auth.decorators import user_passes_test
-# @user_passes_test(lambda u: u.is_superuser)
-# запретить доставать комменты с /comments/id get запросом, только лишь post

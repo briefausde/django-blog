@@ -62,13 +62,9 @@ def add_index(pk):
             indexes = set()
             try:
                 indexes = get_object_or_404(Index, word=word).getindex()
-                type(indexes)
-                print(indexes)
                 indexes.add(pk)
                 Index.objects.filter(word=word).update(index=indexes)
             except:
-                type(indexes)
-                print(indexes)
                 indexes.add(pk)
                 Index.objects.create(word=word, index=indexes)
 
