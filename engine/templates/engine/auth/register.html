@@ -1,6 +1,7 @@
-{% extends 'engine/base_wrap.html' %}
+{% extends 'engine/base.html' %}
 
-{% block content_ww %}
+{% block content %}
+    <div id="main" role="main">
   <h2>Sign up</h2>
 <div class="table-form">
   <form method="post">
@@ -25,5 +26,5 @@
 
 {% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
 {% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}
-
+    </div>
 {% endblock %}

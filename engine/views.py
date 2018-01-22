@@ -150,11 +150,18 @@ def find_word(request, pk=1):
         return render(request, 'engine/search.html', {'search_text': word, 'text': 1})
 
 
-def user_profile(request, username, pk=1):
-    logs_add(request, username)
-    user = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(author=user, published_date__lte=timezone.now()).order_by('author', '-published_date')
-    return render(request, 'engine/post_list.html', {'posts': get_paginator_posts(posts, pk, 9), 'user_profile': user})
+class UserDetailsView(generic.DetailView):
+    model = User
+    context_object_name = 'user'
+    template_name = 'engine/user.html'
+
+    def get_context_data(self, **kwargs):
+        user = self.get_object()
+        logs_add(self.request, user)
+        return super(UserDetailsView, self).get_context_data()
+
+    def get_object(self):
+        return get_object_or_404(self.model, username=self.kwargs['username'])
 
 
 class CommentsListView(generic.ListView):
@@ -303,14 +310,18 @@ class PostsListView(generic.ListView):
         context = super(PostsListView, self).get_context_data(**kwargs)
         category = self.kwargs.get('category_name', 'all')
         pk = self.kwargs.get('pk', 1)
-        if category != "all" or pk != 1:
-            context['category'] = category
-        return context
 
-    def get_queryset(self):
-        category = self.kwargs.get('category_name', 'all')
-        pk = self.kwargs.get('pk', 1)
-        return get_paginator_posts(get_posts(category), pk, 15)
+        if (category in category_list) and (category != "all"):
+            context['category'] = category
+            posts = Post.objects.filter(category__name=category,
+                                        published_date__lte=timezone.now()).order_by('category', '-published_date')
+        else:
+            if pk != 1:
+                context['category'] = "all"
+            posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+
+        context['posts'] = get_paginator_posts(posts, pk, 15)
+        return context
 
 
 class PostDetailsView(generic.DetailView):

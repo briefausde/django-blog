@@ -27,14 +27,10 @@ $(document).ready(function(){
 });
 </script>
 
-<div class="wrap">
     <div id="main" role="main">
-        <ul id="tiles">
-            {% block content_posts %}
-            {% endblock %}
-        </ul>
+        {% block content_posts %}
+        {% endblock %}
     </div>
-</div>
 
 {% if query %}
 <p class="type-centered homepage-see-more">

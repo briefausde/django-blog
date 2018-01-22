@@ -41,8 +41,12 @@
 	<body>
 
 	{% include 'engine/header.html' %}
-    {% block content %}
-    {% endblock %}
+    <div class="content">
+        <div class="wrap">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
 	{% include 'engine/footer.html' %}
 
 	<script src="{% static 'js/jquery.imagesloaded.js' %}"></script>

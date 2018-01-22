@@ -1,16 +1,9 @@
 {% extends 'engine/base.html' %}
 
 {% block content %}
-<div class="content" style="margin-top:-30px">
-	<div class="wrap">
-        <div id="main" role="main">
-            {% include 'engine/user.html' %}
-            <ul id="tiles">
-                {% block content_posts %}
-                {% endblock %}
-            </ul>
-        </div>
-        {% include 'engine/paginator.html' %}
+    <div id="main" role="main">
+        {% block content_posts %}
+        {% endblock %}
     </div>
-</div>
+    {% include 'engine/paginator.html' %}
 {% endblock %}
