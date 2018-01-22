@@ -1,7 +1,7 @@
 {% block content %}
 <div class="footer">
     {% if user.is_staff %}
-    <a href="/admin/">adm</a> | <a href="/view_logs/0">log</a> | <a href="/post/new">post</a>
+    <a href="/admin/">adm</a> | <a href="{% url "logs_view" %}">log</a> | <a href="{% url "post_new" %}">post</a>
     {% else %}
     <p>click on me</p>
     {% endif %}

@@ -126,6 +126,12 @@ class Log(models.Model):
     data = models.TextField(default="")
     date = models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        data = ""
+        if self.data:
+            data = " data: " + self.data
+        return "[" + str(self.date) + "] " + self.user + " (" + self.ip + ") " + self.method + " " + self.path + data
+
 
 class Comment(models.Model):
     author = models.ForeignKey('auth.User', default="Anonymouse")
