@@ -64,18 +64,6 @@ def logs_add(request, data=""):
                        date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # make for timezone django time
 
 
-# view_logs detailview
-def view_logs(request, pk=0):
-    logs_add(request)
-    if request.user.is_staff:
-        if pk == "0":
-            return render(request, 'engine/logs_view.html')
-        else:
-            log = get_object_or_404(Log, pk=pk)
-            return render(request, 'engine/logs_detail.html', {'log': log})
-    return redirect("main")
-
-
 class StaffRequiredMixin(LoginRequiredMixin):
     raise_exception = True
 
@@ -85,18 +73,37 @@ class StaffRequiredMixin(LoginRequiredMixin):
         return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
+class LogsView(StaffRequiredMixin, generic.TemplateView):
+    template_name = 'engine/logs_view.html'
+
+    def get_context_data(self, **kwargs):
+        logs_add(self.request)
+        return super(LogsView, self).get_context_data(**kwargs)
+
+
 class LogsListView(StaffRequiredMixin, generic.ListView):
     model = Log
     context_object_name = 'logs'
-    template_name = 'engine/logs.html'
+    template_name = 'engine/logs_list.html'
 
     def get_context_data(self, **kwargs):
-        context = super(LogsListView, self).get_context_data(**kwargs)
-        # context['some_data'] = 'This is just some data'
-        return context
+        return super(LogsListView, self).get_context_data(**kwargs)
 
     def get_queryset(self):
-        return Log.objects.all().order_by('-date')[0:500]
+        return self.model.objects.all().order_by('-date')[0:500]
+
+
+class LogDetailsView(StaffRequiredMixin, generic.DetailView):
+    model = Log
+    context_object_name = 'log'
+    template_name = 'engine/logs_detail.html'
+
+    def get_context_data(self, **kwargs):
+        logs_add(self.request)
+        return super(LogDetailsView, self).get_context_data()
+
+    def get_object(self):
+        return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
 
 def get_paginator_posts(posts, pk, count):
@@ -114,26 +121,6 @@ def get_posts(category_name):
     else:
         return Post.objects.filter(category__name=category_name,
                                    published_date__lte=timezone.now()).order_by('category', '-published_date')
-
-
-class PostsListView(generic.ListView):
-    model = Post
-    context_object_name = 'posts'
-    template_name = 'engine/post_list.html'
-
-    def get_context_data(self, **kwargs):
-        logs_add(self.request)
-        context = super(PostsListView, self).get_context_data(**kwargs)
-        category = self.kwargs.get('category_name', 'all')
-        pk = self.kwargs.get('pk', 1)
-        if category != "all" or pk != 1:
-            context['category'] = category
-        return context
-
-    def get_queryset(self):
-        category = self.kwargs.get('category_name', 'all')
-        pk = self.kwargs.get('pk', 1)
-        return get_paginator_posts(get_posts(category), pk, 15)
 
 
 def load_static_page(request, page_name):
@@ -176,7 +163,7 @@ class CommentsListView(generic.ListView):
     template_name = 'engine/comments.html'
 
     def get_queryset(self):
-        return Comment.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
+        return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
 @login_required(login_url='/auth/login/')
@@ -306,6 +293,26 @@ def post_edit(request, pk):
     return render(request, 'engine/post_edit.html', {'form': form})
 
 
+class PostsListView(generic.ListView):
+    model = Post
+    context_object_name = 'posts'
+    template_name = 'engine/post_list.html'
+
+    def get_context_data(self, **kwargs):
+        logs_add(self.request)
+        context = super(PostsListView, self).get_context_data(**kwargs)
+        category = self.kwargs.get('category_name', 'all')
+        pk = self.kwargs.get('pk', 1)
+        if category != "all" or pk != 1:
+            context['category'] = category
+        return context
+
+    def get_queryset(self):
+        category = self.kwargs.get('category_name', 'all')
+        pk = self.kwargs.get('pk', 1)
+        return get_paginator_posts(get_posts(category), pk, 15)
+
+
 class PostDetailsView(generic.DetailView):
     model = Post
     context_object_name = 'post'
@@ -314,7 +321,7 @@ class PostDetailsView(generic.DetailView):
     def get_context_data(self, **kwargs):
         logs_add(self.request)
         post = self.get_object()
-        Post.objects.filter(pk=post.pk).update(views=(post.views + 1))
+        self.model.objects.filter(pk=post.pk).update(views=(post.views + 1))
         context = super(PostDetailsView, self).get_context_data()
         from math import floor
         time = floor(len(post.text_big) * 0.075 / 60)
@@ -323,7 +330,7 @@ class PostDetailsView(generic.DetailView):
         return context
 
     def get_object(self):
-        return get_object_or_404(Post, url=refactor_url(self.kwargs['name']))
+        return get_object_or_404(self.model, url=refactor_url(self.kwargs['name']))
 
 
 def delete_indexes():
@@ -333,11 +340,6 @@ def delete_indexes():
 
 def split_str(string):
     return set(str.upper(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', string).replace("  ", " ")).split(" "))
-
-
-def test():
-    posts = Post.objects.order_by('-pk')[0].pk
-    print("test function: %s" % posts)
 
 
 def create_indexes():
