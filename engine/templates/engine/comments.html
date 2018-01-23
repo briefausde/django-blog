@@ -1,11 +1,13 @@
 {% block comments %}
-{% for comment in comments %}
-            <div class="grid_text">
-                <h4 class="style1 list">{% if comment.author %}<a href="{% url 'user_profile' username=comment.author %}">{{ comment.author }}</a>{% endif %}</h4>
-                {%  if user == comment.author or user.is_staff %}<h3 style="float:right" onclick="result = confirm('Do you want delete this comment?');if(result == true){AjaxRemoveComment({{comment.pk}});}">Delete</h3>{% endif %}
-                <h3 class="style">{{ comment.created_date }}</h3>
-                <p class="para top"> {{ comment.text|linebreaksbr }}</p>
-            </div>
-            <div class="clear"></div>
-            {% endfor %}
+    {% for comment in comments %}
+        <div class="grid_text">
+            <h4 class="style1 list">{% if comment.author %}<a href="{% url 'user_profile' username=comment.author %}">{{ comment.author }}</a>{% endif %}</h4>
+            {%  if user == comment.author or user.is_staff %}
+                <h3 style="float:right" onclick="result = confirm('Do you want delete this comment?');if(result == true){AjaxRemoveComment({{comment.pk}});}">Delete</h3>
+            {% endif %}
+            <h3 class="style">{{ comment.created_date }}</h3>
+            <p class="para top"> {{ comment.text|linebreaksbr }}</p>
+        </div>
+        <div class="clear"></div>
+    {% endfor %}
 {% endblock %}

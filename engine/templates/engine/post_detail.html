@@ -29,68 +29,67 @@
         });
     }
 </script>
-		<div class="single-page">
-			<div class="single-page-artical">
-				<div class="artical-content">
-					<img src="{{ post.img_big }}" title="{{ post.name }}" width="100%" height="70%">
-					<h3><a href="{% url 'post_detail' name=post.url %}">{{ post.name }}</a></h3>
-					<p>{{ post.text_big }}</p>
-				</div>
-				<div class="share-artical">
-					<ul>
-						<li><a href="{% url 'user_profile' username=post.author %}">Added {{ post.author }}</a></li>
-						<li><a href="">Read {{ read_time }} minutes</a></li>
-						<li><a href="">{{ post.views }} views</a></li>
-						<li><a href="{% url 'post_edit' pk=post.pk %}">{{ post.published_date }}</a></li>
-					</ul>
-				</div>
-				<div class="clear"> </div>
-			</div>
+    <div class="single-page">
+        <div class="single-page-artical">
+            <div class="artical-content">
+                <img src="{{ post.img_big }}" title="{{ post.name }}" width="100%" height="70%">
+                <h3><a href="{% url 'post_detail' name=post.url %}">{{ post.name }}</a></h3>
+                <p>{{ post.text_big }}</p>
+            </div>
+            <div class="share-artical">
+                <ul>
+                    <li><a href="{% url 'user_profile' username=post.author %}">Added {{ post.author }}</a></li>
+					<li><a href="">Read {{ read_time }} minutes</a></li>
+					<li><a href="">{{ post.views }} views</a></li>
+					<li><a href="{% url 'post_edit' pk=post.pk %}">{{ post.published_date }}</a></li>
+                </ul>
+            </div>
+			<div class="clear"> </div>
+        </div>
 
-			<div class="comment-section">
-    			<div class="grids_of_2">
-        			<div class="grid1_of_2 left">
-            			<h2>Comments</h2>
-            			{% if user.is_authenticated %}
-            			<div class="artical-commentbox">
-	                		<div class="table-form">
-								{% if post.comments_mode %}
-	                    		<form  id="form" method="POST" name="post_comment" onsubmit="getAjax()" action="javascript:void(null);">{% csrf_token %}
-                                    <textarea id="id_text" class="form-control" placeholder="Input your comment and press ENTER" name="text" style="width:87%;height:50px"></textarea>
-									<script type="text/javascript">
-	                    				function getAjax() {
-	                        				var textComment   = $('#form').serialize();
-	                        				$.ajax({
-	                            				url: "{% url 'add_comment' post.pk %}",
-	                            				type: 'POST',
-	                            				data: textComment,
-	                            				success: function(){
-	                                				updateComments();
-	                            				}
-											});
-											$("#id_text").val('');
-											$("#id_text").blur();
-										}
-	                    				$(document).ready(function(){
-	                        				$("#id_text").keypress(function(e){
-	                            				if(e.keyCode==13){
-	                                				$("#form").submit();
-	                            				}
-	                        				});
-	                    				});
-	                				</script>
-	                    		</form>
-								{% endif %}
-	                		</div>
-	                		<div class="clear"> </div>
-	            		</div>
-	            		{% else %}
-	            		<br><a href="{% url 'auth:login' %}?next=/article/{{ post.url }}">For add comment log-in, please</a><br><br>
-	            		{% endif %}
-						<div id="comments"></div>
-	        		</div>
-	    		</div>
-			</div>
-
+        <div class="comment-section">
+    		<div class="grids_of_2">
+        		<div class="grid1_of_2 left">
+           			<h2>Comments</h2>
+           			{% if user.is_authenticated %}
+           			<div class="artical-commentbox">
+	               		<div class="table-form">
+							{% if post.comments_mode %}
+	                   		<form  id="form" method="POST" name="post_comment" onsubmit="getAjax()" action="javascript:void(null);">{% csrf_token %}
+                                   <textarea id="id_text" class="form-control" placeholder="Input your comment and press ENTER" name="text" style="width:87%;height:50px"></textarea>
+								<script type="text/javascript">
+	                   				function getAjax() {
+	                       				var textComment   = $('#form').serialize();
+	                       				$.ajax({
+	                           				url: "{% url 'add_comment' post.pk %}",
+	                           				type: 'POST',
+	                           				data: textComment,
+	                           				success: function(){
+	                               				updateComments();
+	                           				}
+										});
+										$("#id_text").val('');
+										$("#id_text").blur();
+									}
+	                   				$(document).ready(function(){
+	                       				$("#id_text").keypress(function(e){
+	                           				if(e.keyCode==13){
+	                               				$("#form").submit();
+	                           				}
+	                       				});
+	                   				});
+	               				</script>
+	                   		</form>
+							{% endif %}
+	               		</div>
+	               		<div class="clear"> </div>
+	           		</div>
+	           		{% else %}
+	           		<br><a href="{% url 'auth:login' %}?next=/article/{{ post.url }}">For add comment log-in, please</a><br><br>
+	           		{% endif %}
+					<div id="comments"></div>
+	       		</div>
+	    	</div>
 		</div>
+    </div>
 {% endblock %}

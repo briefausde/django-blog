@@ -2,21 +2,20 @@
 
 {% block content %}
     <div id="main" role="main">
-<div class="row">
-    <div class="feature-box">
-        <div class="story-teaser_banner">
-            <div class="story-teaser_image">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Justitiepaleis1.jpg/1024px-Justitiepaleis1.jpg" style="width:100%;height:246px">
-            </div>
-            <div class="story-details story-teaser_text">
-                <h3 class="heading-standard"><a href="{% url 'user_profile' username=user %}">{{ user }}{% if request.user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
-                <em class="story-detail_subtitle">joined {{ user.date_joined }} | last login {{ user.last_login }}</em>
-                <p>You can contact with me in mail. My mail you can see in down</p>
-                <p>Contact - {{ user.email }}</p>
+        <div class="row">
+            <div class="feature-box">
+                <div class="story-teaser_banner">
+                    <div class="story-teaser_image">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Justitiepaleis1.jpg/1024px-Justitiepaleis1.jpg" style="width:100%;height:246px">
+                    </div>
+                    <div class="story-details story-teaser_text">
+                        <h3 class="heading-standard"><a href="{% url 'user_profile' username=user %}">{{ user }}{% if request.user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
+                        <em class="story-detail_subtitle">joined {{ user.date_joined }} | last login {{ user.last_login }}</em>
+                        <p>You can contact with me in mail. My mail you can see in down</p>
+                        <p>Contact - {{ user.email }}</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-</div>
     </div>
 {% endblock %}

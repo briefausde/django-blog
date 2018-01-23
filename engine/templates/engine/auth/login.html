@@ -2,17 +2,17 @@
 
 {% block content %}
     <div id="main" role="main">
-<h1>Login</h1>
-<div class="table-form">
-<form method="POST" class="auth-form">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="save btn btn-default">Save</button>
-</form>
-</div>
+        <h1>Login</h1>
+        <div class="table-form">
+            <form method="POST" class="auth-form">{% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="save btn btn-default">Save</button>
+            </form>
+        </div>
 
-<a href="{% url 'auth:register' %}">Если у вас нет аккаунта, вы можете зарегистрароваться</a>
+        <a href="{% url 'auth:register' %}">Если у вас нет аккаунта, вы можете зарегистрароваться</a>
 
-{% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
-{% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}
+        {% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
+        {% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}
     </div>
 {% endblock %}
