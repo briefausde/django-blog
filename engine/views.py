@@ -61,7 +61,8 @@ def logs_add(request, data=""):
                        cookies=str(request.COOKIES),
                        meta=str(request.META),
                        data=str(data).strip(),
-                       date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # make for timezone django time
+                       date=timezone.now()
+                       )  # make for timezone django time
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
@@ -86,9 +87,6 @@ class LogsListView(StaffRequiredMixin, generic.ListView):
     context_object_name = 'logs'
     template_name = 'engine/logs_list.html'
 
-    def get_context_data(self, **kwargs):
-        return super(LogsListView, self).get_context_data(**kwargs)
-
     def get_queryset(self):
         return self.model.objects.all().order_by('-date')[0:500]
 
@@ -98,11 +96,8 @@ class LogDetailsView(StaffRequiredMixin, generic.DetailView):
     context_object_name = 'log'
     template_name = 'engine/logs_detail.html'
 
-    def get_context_data(self, **kwargs):
-        logs_add(self.request)
-        return super(LogDetailsView, self).get_context_data()
-
     def get_object(self):
+        logs_add(self.request)
         return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
 
@@ -155,12 +150,8 @@ class UserDetailsView(generic.DetailView):
     context_object_name = 'user'
     template_name = 'engine/user.html'
 
-    def get_context_data(self, **kwargs):
-        user = self.get_object()
-        logs_add(self.request, user)
-        return super(UserDetailsView, self).get_context_data()
-
     def get_object(self):
+        logs_add(self.request)
         return get_object_or_404(self.model, username=self.kwargs['username'])
 
 
@@ -273,8 +264,19 @@ class PostCreateView(LoginRequiredMixin, generic.CreateView):
             return redirect('main')
 
 
+class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
+    raise_exception = True
+
+    def dispatch(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        if (self.request.user != post.author) and not self.request.user.is_superuser:
+            return redirect('post_detail', name=post.url)
+            # return self.handle_no_permission()  # or just take raise_exception = False that redirect on 'main'
+        return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
 # сделать чтобы юзер не смог заходить на форму изменений статьи, где он не автор
-class PostEditView(LoginRequiredMixin, generic.UpdateView):
+class PostEditView(AuthorOrStaffRequiredMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'engine/post_new_edit.html'
@@ -286,12 +288,6 @@ class PostEditView(LoginRequiredMixin, generic.UpdateView):
     def get_context_data(self, **kwargs):
         logs_add(self.request)
         return super(PostEditView, self).get_context_data()
-
-    def form_valid(self, form):
-        if (self.request.user == form.instance.author) or self.request.user.is_superuser:
-            return super(PostEditView, self).form_valid(form)
-        else:
-            return redirect('main')
 
 
 class PostsListView(generic.ListView):
