@@ -52,9 +52,8 @@ def reload(request):
 
 def logs_add(request, data=""):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
-    import datetime
     Log.objects.create(ip=ip,
-                       user=request.user,
+                       author=request.user,
                        method=request.method,
                        path=request.path,
                        body=str(request.body).strip(),
@@ -62,7 +61,7 @@ def logs_add(request, data=""):
                        meta=str(request.META),
                        data=str(data).strip(),
                        date=timezone.now()
-                       )  # make for timezone django time
+                       )
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
@@ -78,8 +77,13 @@ class LogsView(StaffRequiredMixin, generic.TemplateView):
     template_name = 'engine/logs_view.html'
 
     def get_context_data(self, **kwargs):
-        logs_add(self.request)
-        return super(LogsView, self).get_context_data(**kwargs)
+        context = super(LogsView, self).get_context_data()
+        context['filter'] = self.request.GET.get('filter')
+        context['path'] = self.request.GET.get('path')
+        context['ip'] = self.request.GET.get('ip')
+        context['author'] = self.request.GET.get('author')
+        context['data'] = self.request.GET.get('data')
+        return context
 
 
 class LogsListView(StaffRequiredMixin, generic.ListView):
@@ -88,6 +92,15 @@ class LogsListView(StaffRequiredMixin, generic.ListView):
     template_name = 'engine/logs_list.html'
 
     def get_queryset(self):
+        filter = self.request.GET.get('filter')
+        if filter == "path":
+            return self.model.objects.filter(path=self.request.GET.get(filter)).order_by('-date')[0:500]
+        if filter == "ip":
+            return self.model.objects.filter(ip=self.request.GET.get(filter)).order_by('-date')[0:500]
+        if filter == "author":
+            return self.model.objects.filter(author=self.request.GET.get(filter)).order_by('-date')[0:500]
+        if filter == "data":
+            return self.model.objects.filter(data=self.request.GET.get(filter)).order_by('-date')[0:500]
         return self.model.objects.all().order_by('-date')[0:500]
 
 
@@ -193,7 +206,7 @@ def login(request):
     if not request.user.is_authenticated():
         if request.method == "POST":
             username = request.POST['username']
-            logs_add(request, '[trying login as] ' + username)
+            logs_add(request, '[trying_login]' + username)
             password = request.POST['password']
             user = auth_authenticate(username=username, password=password)
             # from django.contrib.auth.validators import ASCIIUsernameValidator
@@ -201,7 +214,7 @@ def login(request):
             if user is not None:
                 if user.is_active:
                     auth_login(request, user)
-                    logs_add(request, '[successful login as] ' + username)
+                    logs_add(request, '[login]' + username)
                     next_url = request.GET.get('next', '')
                     if next_url and (next_url is not "/accounts/logout/"):
                         return redirect(next_url)
@@ -238,7 +251,7 @@ def change_password(request):
 
 @login_required(login_url='/auth/login/')
 def logout(request):
-    logs_add(request, '[logout]')
+    logs_add(request, '[logout]' + request.user)
     auth_logout(request)
     return render(request, 'engine/auth/logout.html')
 
@@ -269,13 +282,13 @@ class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
 
     def dispatch(self, request, *args, **kwargs):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        # if (true) and (true(not true))
         if (self.request.user != post.author) and not self.request.user.is_superuser:
             return redirect('post_detail', name=post.url)
             # return self.handle_no_permission()  # or just take raise_exception = False that redirect on 'main'
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
-# сделать чтобы юзер не смог заходить на форму изменений статьи, где он не автор
 class PostEditView(AuthorOrStaffRequiredMixin, generic.UpdateView):
     model = Post
     form_class = PostForm

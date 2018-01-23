@@ -6,6 +6,13 @@
         $.ajax({
             url: "{% url 'logs_list' %}",
             cache: false,
+            data: {
+                {% if filter %}filter: '{{ filter }}',{% endif %}
+                {% if path %}path: '{{ path }}',{% endif %}
+                {% if ip %}ip: '{{ ip }}',{% endif %}
+                {% if author %}author: '{{ author }}',{% endif %}
+                {% if data %}data: '{{ data }}',{% endif %}
+            },
             success: function(html){
                 $("#logs").html(html);
             }
@@ -18,6 +25,8 @@
 </script>
 <div id="main" role="main">
     <ul id="tiles">
+        <a href="{% url "logs_view" %}">Clear filters</a>
+        <br><br><br>
         <div id="logs"></div>
     </ul>
 </div>

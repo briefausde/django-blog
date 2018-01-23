@@ -127,7 +127,7 @@ class Index(models.Model):
 
 class Log(models.Model):
     ip = models.GenericIPAddressField()
-    user = models.CharField(max_length=500, default="Anonymouse")
+    author = models.CharField(max_length=500, default="Anonymouse")
     method = models.TextField()
     path = models.TextField()
     body = models.TextField()
