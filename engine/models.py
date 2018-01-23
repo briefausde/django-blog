@@ -42,6 +42,7 @@ class Post(models.Model):
     comments_mode = models.BooleanField(default=True)
 
     def get_absolute_url(self):
+        # return reverse('post_detail', args=(self.url,))
         return "/article/%s" % self.url
 
     def comments_open(self):
@@ -52,8 +53,17 @@ class Post(models.Model):
         self.save()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        from .views import url_refactor
+        import time
+        self.published_date = timezone.now()
+        if len(self.url) > 1:
+            if Post.objects.filter(url=url_refactor(self.url)).exclude(pk=self.pk).order_by('url'):
+                self.url = url_refactor(self.url) + "-" + str(round(time.time()))
+            else:
+                self.url = url_refactor(self.url)
+        else:
+            self.url = url_refactor(self.name)
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        # Post.objects.filter(url=self.url).update(url="band")
         # add_index(self.pk)
 
     def __str__(self):

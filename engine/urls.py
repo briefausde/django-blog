@@ -15,7 +15,7 @@ sitemaps = {
     "blog": EngineSitemap
 }
 
-auth_urlpatterns = [
+accounts_urlpatterns = [
     url(r'^login/$', views.login, name='login'),
     url(r'^register/$', (CreateView.as_view(model=User, get_success_url=views.register, form_class=UserCreationForm,
                                             template_name="engine/auth/register.html")), name='register'),
@@ -29,8 +29,8 @@ urlpatterns = [
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     url(r'^$', views.PostsListView.as_view(), name='main'),
     # url(r'^view/(?P<pk>[0-9]+)/$', views.post_detail, name='post_detail'),
-    url(r'^post/new/$', views.post_new, name='post_new'),
-    url(r'^edit/(?P<pk>[0-9]+)/$', views.post_edit, name='post_edit'),
+    url(r'^post/new/$', views.PostCreateView.as_view(), name='post_new'),
+    url(r'^edit/(?P<pk>[0-9]+)/$', views.PostEditView.as_view(), name='post_edit'),
     url(r'^article/(?P<name>[-\w]+)$', views.PostDetailsView.as_view(), name='post_detail'),
     url(r'^(?P<category_name>%s)/$' % categories_list,
         views.PostsListView.as_view(),
@@ -46,7 +46,7 @@ urlpatterns = [
     url(r'^logs_list/$', views.LogsListView.as_view(), name='logs_list'),
     url(r'^logs/(?P<pk>[0-9]+)/$', views.LogDetailsView.as_view(), name='logs_detail'),
     url(r'^reload/$', views.reload, name='reload'),
-    url(r'^auth/', include(auth_urlpatterns, namespace='auth')),
+    url(r'^accounts/', include(accounts_urlpatterns, namespace='accounts')),
     url(r'^comments/(?P<post_id>[\d+]*)$', views.CommentsListView.as_view(), name='comments'),
     url(r'^add_comment/(?P<post_id>[\d+]*)$', views.add_comment, name='add_comment'),
     url(r'^remove_comment/$', views.remove_comment, name='remove_comment'),

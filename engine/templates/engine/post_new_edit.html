@@ -2,7 +2,6 @@
 
 {% block content %}
     <div id="main" role="main">
-        <h1>New post</h1>
         <div class="table-form">
             <form method="POST" class="post-form">{% csrf_token %}
                 {{ form.as_p }}

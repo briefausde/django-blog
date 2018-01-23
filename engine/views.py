@@ -6,6 +6,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate as auth_authenticate
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
 from django.utils import timezone
@@ -13,7 +14,6 @@ from django.views import generic
 from django.urls import reverse
 from .forms import AuthForm, PostForm
 from .models import Post, Log, Category, Comment, StaticPage, Index
-from random import randint
 from re import sub
 
 
@@ -117,10 +117,10 @@ def get_paginator_posts(posts, pk, count):
 
 def get_posts(category_name):
     if (category_name == "all") or (category_name not in category_list):
-        return Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+        return Post.objects.filter(created_date__lte=timezone.now()).order_by('-created_date')
     else:
         return Post.objects.filter(category__name=category_name,
-                                   published_date__lte=timezone.now()).order_by('category', '-published_date')
+                                   created_date__lte=timezone.now()).order_by('category', '-created_date')
 
 
 def load_static_page(request, page_name):
@@ -173,7 +173,7 @@ class CommentsListView(generic.ListView):
         return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
-@login_required(login_url='/auth/login/')
+@login_required(login_url='/accounts/login/')
 def add_comment(request, post_id):
     if request.POST:
         post = get_object_or_404(Post, pk=post_id)
@@ -186,7 +186,7 @@ def add_comment(request, post_id):
     return redirect('/')
 
 
-@login_required(login_url='/auth/login/')
+@login_required(login_url='/accounts/login/')
 def remove_comment(request):
     if request.method == "POST":
         comment_id = str(request.body).split("=")[2][0:-1]
@@ -212,7 +212,7 @@ def login(request):
                     auth_login(request, user)
                     logs_add(request, '[successful login as] ' + username)
                     next_url = request.GET.get('next', '')
-                    if next_url and (next_url is not "/auth/logout/"):
+                    if next_url and (next_url is not "/accounts/logout/"):
                         return redirect(next_url)
                     else:
                         return redirect('main')
@@ -252,52 +252,46 @@ def logout(request):
     return render(request, 'engine/auth/logout.html')
 
 
-def refactor_url(text):
+def url_refactor(text):
     return str.lower(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', text.replace("-", " ")).replace(" ", "-"))
 
 
-def upd(request, form):
-    logs_add(request)
-    post = form.save(commit=False)
-    post.author = request.user
-    post.published_date = timezone.now()
-    if len(post.url) > 1:
-        # where url=post.url and pk isn't post.pk
-        if Post.objects.filter(url=refactor_url(post.url)).exclude(pk=post.pk).order_by('url'):
-            post.url = refactor_url(post.url) + "-" + str(randint(1, 999999))
+class PostCreateView(LoginRequiredMixin, generic.CreateView):
+    form_class = PostForm
+    template_name = 'engine/post_new_edit.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PostCreateView, self).get_context_data()
+        context.update(csrf(self.request))
+        return context
+
+    def form_valid(self, form):
+        if self.request.user:
+            form.instance.author = self.request.user
+            return super(PostCreateView, self).form_valid(form)
         else:
-            post.url = refactor_url(post.url)
-    else:
-        post.url = refactor_url(post.name)
-    post.save()
-    return post.url
+            return redirect('main')
 
 
-@login_required(login_url='/auth/login/')
-def post_new(request):  # добавить функцию в модель поста
-    logs_add(request)
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            return redirect('post_detail', name=upd(request, form))
-    else:
-        form = PostForm()
-    return render(request, 'engine/post_edit.html', {'form': form})
+# сделать чтобы юзер не смог заходить на форму изменений статьи, где он не автор
+class PostEditView(LoginRequiredMixin, generic.UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'engine/post_new_edit.html'
 
+    def get_success_url(self):
+        # return '/article/{}'.format(self.object.url)
+        return reverse('post_detail', args=(self.object.url,))
 
-@login_required(login_url='/auth/login/')
-def post_edit(request, pk):
-    logs_add(request)
-    post = get_object_or_404(Post, pk=pk)
-    if request.user != post.author:
-        return redirect('post_detail', pk=post.pk)
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            return redirect('post_detail', name=upd(request, form))
-    else:
-        form = PostForm(instance=post)
-    return render(request, 'engine/post_edit.html', {'form': form})
+    def get_context_data(self, **kwargs):
+        logs_add(self.request)
+        return super(PostEditView, self).get_context_data()
+
+    def form_valid(self, form):
+        if (self.request.user == form.instance.author) or self.request.user.is_superuser:
+            return super(PostEditView, self).form_valid(form)
+        else:
+            return redirect('main')
 
 
 class PostsListView(generic.ListView):
@@ -314,11 +308,11 @@ class PostsListView(generic.ListView):
         if (category in category_list) and (category != "all"):
             context['category'] = category
             posts = Post.objects.filter(category__name=category,
-                                        published_date__lte=timezone.now()).order_by('category', '-published_date')
+                                        created_date__lte=timezone.now()).order_by('category', '-created_date')
         else:
             if pk != 1:
                 context['category'] = "all"
-            posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+            posts = Post.objects.filter(created_date__lte=timezone.now()).order_by('-created_date')
 
         context['posts'] = get_paginator_posts(posts, pk, 15)
         return context
@@ -341,7 +335,7 @@ class PostDetailsView(generic.DetailView):
         return context
 
     def get_object(self):
-        return get_object_or_404(self.model, url=refactor_url(self.kwargs['name']))
+        return get_object_or_404(self.model, url=url_refactor(self.kwargs['name']))
 
 
 def delete_indexes():

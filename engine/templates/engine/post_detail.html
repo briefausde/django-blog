@@ -41,7 +41,7 @@
                     <li><a href="{% url 'user_profile' username=post.author %}">Added {{ post.author }}</a></li>
 					<li><a href="">Read {{ read_time }} minutes</a></li>
 					<li><a href="">{{ post.views }} views</a></li>
-					<li><a href="{% url 'post_edit' pk=post.pk %}">{{ post.published_date }}</a></li>
+					<li><a href="{% url 'post_edit' pk=post.pk %}">{{ post.created_date }}</a></li>
                 </ul>
             </div>
 			<div class="clear"> </div>
@@ -85,7 +85,7 @@
 	               		<div class="clear"> </div>
 	           		</div>
 	           		{% else %}
-	           		<br><a href="{% url 'auth:login' %}?next=/article/{{ post.url }}">For add comment log-in, please</a><br><br>
+	           		<br><a href="{% url 'accounts:login' %}?next=/article/{{ post.url }}">For add comment log-in, please</a><br><br>
 	           		{% endif %}
 					<div id="comments"></div>
 	       		</div>
