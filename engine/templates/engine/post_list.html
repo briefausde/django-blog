@@ -4,12 +4,12 @@
     <ul id="tiles">
         {% for post in posts %}
             <li onclick="location.href='{% url 'post_detail' name=post.url %}';">
-                <img src="{{ post.img_small }}" width="100%">
+                {% if post.img_small %}<img src="{{ post.img_small }}" width="100%">{% endif %}
                 <div class="post-info">
                     <div class="post-basic-info">
-                        <h3><a href="{% url 'post_detail' name=post.url %}">{{ post.name }}</a></h3>
+                        <h3><a href="{% url 'post_detail' name=post.url %}">{{ post.name|truncatechars:64 }}</a></h3>
                         <span><a href="{% url 'post_detail' name=post.url %}"><label> </label>{{ post.published_date }}</a></span>
-                        <p>{{ post.text_small }}</p>
+                        <p>{{ post.text_small|truncatechars:280 }}</p>
                     </div>
                     <div class="post-info-rate-share">
                         <div class="rateit">

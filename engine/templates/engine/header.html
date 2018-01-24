@@ -14,9 +14,8 @@
 						<div class="menu_box_list">
 							<ul>
 								<li><a href="/"><span>Home</span></a></li>
-								<li><a href="{% url 'load_static_page' page_name='about' %}"><span>About</span></a></li>
-								<li><a href="{% url 'load_static_page' page_name='history' %}"><span>History</span></a></li>
 								<li><a href="{% url 'get_from_category' category_name='news' %}"><span>News</span></a></li>
+                                <li><a href="/about"><span>About</span></a></li>
 								{% if request.user.is_authenticated %}<li><a href="{% url 'accounts:logout' %}"><span>Logout</span></a></li>{% endif %}
 								<div class="clear"> </div>
 							</ul>

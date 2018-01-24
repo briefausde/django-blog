@@ -33,7 +33,7 @@
         <div class="single-page-artical">
             <div class="artical-content">
                 <img src="{{ post.img_big }}" title="{{ post.name }}" width="100%" height="70%">
-                <h3><a href="{% url 'post_detail' name=post.url %}">{{ post.name }}</a></h3>
+                <h3><a href="{% url 'post_detail' name=post.url %}">{{ post.name|truncatechars:64 }}</a></h3>
                 <p>{{ post.text_big }}</p>
             </div>
             <div class="share-artical">

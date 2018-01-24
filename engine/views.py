@@ -6,6 +6,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate as auth_authenticate
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.template import TemplateDoesNotExist
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
@@ -27,18 +28,26 @@ from re import sub
 # @cache_page(120, key_prefix="main")
 
 
-category_list = ""
-static_pages_list = ""
-try:
-    for i in Category.objects.all():
-        category_list += i.name + "|"
-    category_list = category_list[0:-1]
+# always restart server after appending new category
+def declare_category_list():
+    categories = ""
+    for category in Category.objects.all():
+        categories += category.name + "|"
+    return categories[0:-1]
 
-    for i in StaticPage.objects.all():
-        static_pages_list += i.url + "|"
-    static_pages_list = static_pages_list[0:-1]
-except:
-    print("Static_page_template_error: please add data in category or staticpage")
+
+category_list = declare_category_list()
+
+
+# always restart server after appending new static_page
+def declare_static_pages_list():
+    pages = ""
+    for page in StaticPage.objects.all():
+        pages += page.url + "|"
+    return pages[0:-1]
+
+
+static_pages_list = declare_static_pages_list()
 
 
 def reload(request):
@@ -62,6 +71,22 @@ def logs_add(request, data=""):
                        data=str(data).strip(),
                        date=timezone.now()
                        )
+
+
+def url_refactor(text):
+    return str.lower(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', text.replace("-", " ")).replace(" ", "-"))
+
+
+class StaticPageView(generic.TemplateView):
+    model = StaticPage
+    template_name = ''
+
+    def get_context_data(self, **kwargs):
+        url = self.kwargs['page_name']
+        logs_add(self.request, url)
+        # добавить обработку ошибки если файла с шаблоном не существует
+        self.template_name = 'engine/static/' + get_object_or_404(self.model, url=url).template_name
+        return super(StaticPageView, self).get_context_data()
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
@@ -92,15 +117,15 @@ class LogsListView(StaffRequiredMixin, generic.ListView):
     template_name = 'engine/logs_list.html'
 
     def get_queryset(self):
-        filter = self.request.GET.get('filter')
-        if filter == "path":
-            return self.model.objects.filter(path=self.request.GET.get(filter)).order_by('-date')[0:500]
-        if filter == "ip":
-            return self.model.objects.filter(ip=self.request.GET.get(filter)).order_by('-date')[0:500]
-        if filter == "author":
-            return self.model.objects.filter(author=self.request.GET.get(filter)).order_by('-date')[0:500]
-        if filter == "data":
-            return self.model.objects.filter(data=self.request.GET.get(filter)).order_by('-date')[0:500]
+        filters = self.request.GET.get('filter')
+        if filters == "path":
+            return self.model.objects.filter(path=self.request.GET.get(filters)).order_by('-date')[0:500]
+        if filters == "ip":
+            return self.model.objects.filter(ip=self.request.GET.get(filters)).order_by('-date')[0:500]
+        if filters == "author":
+            return self.model.objects.filter(author=self.request.GET.get(filters)).order_by('-date')[0:500]
+        if filters == "data":
+            return self.model.objects.filter(data=self.request.GET.get(filters)).order_by('-date')[0:500]
         return self.model.objects.all().order_by('-date')[0:500]
 
 
@@ -129,15 +154,6 @@ def get_posts(category_name):
     else:
         return Post.objects.filter(category__name=category_name,
                                    created_date__lte=timezone.now()).order_by('category', '-created_date')
-
-
-def load_static_page(request, page_name):
-    logs_add(request)
-    try:
-        template = get_object_or_404(StaticPage, url=page_name).template_name
-        return render(request, 'engine/static/' + template)
-    except:
-        return redirect('main')
 
 
 def find_word(request, pk=1):
@@ -203,32 +219,34 @@ def remove_comment(request):
 
 
 def login(request):
-    if not request.user.is_authenticated():
-        if request.method == "POST":
-            username = request.POST['username']
-            logs_add(request, '[trying_login]' + username)
-            password = request.POST['password']
-            user = auth_authenticate(username=username, password=password)
-            # from django.contrib.auth.validators import ASCIIUsernameValidator
-            # username_validator = ASCIIUsernameValidator()
-            if user is not None:
-                if user.is_active:
-                    auth_login(request, user)
-                    logs_add(request, '[login]' + username)
-                    next_url = request.GET.get('next', '')
-                    if next_url and (next_url is not "/accounts/logout/"):
-                        return redirect(next_url)
-                    else:
-                        return redirect('main')
-                else:
-                    return render(request, 'engine/auth/login.html', {'text': 1})
-            else:
-                return render(request, 'engine/auth/login.html', {'text': 2})
-        else:
-            form = AuthForm()
-        return render(request, 'engine/auth/login.html', {'form': form})
-    else:
-        return redirect('main')
+    # if not request.user.is_authenticated():
+    #     if request.method == "POST":
+    #         username = request.POST['username']
+    #         logs_add(request, '[trying_login]' + username)
+    #         password = request.POST['password']
+    #         user = auth_authenticate(username=username, password=password)
+    #         # from django.contrib.auth.validators import ASCIIUsernameValidator
+    #         # username_validator = ASCIIUsernameValidator()
+    #         if user is not None:
+    #             if user.is_active:
+    #                 auth_login(request, user)
+    #                 logs_add(request, '[login]' + username)
+    #                 next_url = request.GET.get('next', '')
+    #                 if next_url and (next_url is not "/accounts/logout/"):
+    #                     return redirect(next_url)
+    #                 else:
+    #                     return redirect('main')
+    #             else:
+    #                 return render(request, 'engine/auth/_login.html', {'text': 1})
+    #         else:
+    #             return render(request, 'engine/auth/_login.html', {'text': 2})
+    #     else:
+    #         form = AuthForm()
+    #     return render(request, 'engine/auth/_login.html', {'form': form})
+    # else:
+    #     return redirect('main')
+    print("login")
+    return reverse('main')
 
 
 def register():
@@ -251,13 +269,9 @@ def change_password(request):
 
 @login_required(login_url='/auth/login/')
 def logout(request):
-    logs_add(request, '[logout]' + request.user)
+    logs_add(request, '[logout]' + str(request.user))
     auth_logout(request)
     return render(request, 'engine/auth/logout.html')
-
-
-def url_refactor(text):
-    return str.lower(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', text.replace("-", " ")).replace(" ", "-"))
 
 
 class PostCreateView(LoginRequiredMixin, generic.CreateView):
@@ -278,14 +292,11 @@ class PostCreateView(LoginRequiredMixin, generic.CreateView):
 
 
 class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
-    raise_exception = True
-
     def dispatch(self, request, *args, **kwargs):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
         # if (true) and (true(not true))
         if (self.request.user != post.author) and not self.request.user.is_superuser:
             return redirect('post_detail', name=post.url)
-            # return self.handle_no_permission()  # or just take raise_exception = False that redirect on 'main'
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
@@ -335,7 +346,8 @@ class PostDetailsView(generic.DetailView):
     def get_context_data(self, **kwargs):
         logs_add(self.request)
         post = self.get_object()
-        self.model.objects.filter(pk=post.pk).update(views=(post.views + 1))
+        post.views += 1
+        post.save()
         context = super(PostDetailsView, self).get_context_data()
         from math import floor
         time = floor(len(post.text_big) * 0.075 / 60)
@@ -344,7 +356,7 @@ class PostDetailsView(generic.DetailView):
         return context
 
     def get_object(self):
-        return get_object_or_404(self.model, url=url_refactor(self.kwargs['name']))
+        return Post.objects.filter(url=url_refactor(self.kwargs['name'])).first()
 
 
 def delete_indexes():

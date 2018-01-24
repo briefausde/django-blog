@@ -28,10 +28,10 @@ class Category(models.Model):
 
 class Post(models.Model):
     author = models.ForeignKey('auth.User')
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=64)
     img_small = models.CharField(max_length=500, default="https://khmw.nl/wp-content/plugins/pt-content-views-pro/public/assets/images/default_image.png", blank=True)
     img_big = models.CharField(max_length=500, default="https://www.moderndaymystic.com/wp-content/themes/laneluxury//assets/images/no-image-1280x800.jpg", blank=True)
-    text_small = models.CharField(max_length=500, blank=True)
+    text_small = models.CharField(max_length=280, blank=True)
     text_big = models.TextField()
     tags = models.CharField(max_length=300, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

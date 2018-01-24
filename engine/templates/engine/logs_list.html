@@ -1,5 +1,6 @@
 {% block logs %}
     {% for log in logs %}
-        <p><a href="{% url "logs_detail" log.pk %}">[{{ log.date|date:"G:i:s" }}] <a onclick="document.location='?filter=author&author={{ log.author }}'">{{ log.author }}</a> (<a onclick="document.location='?filter=ip&ip={{ log.ip }}'">{{ log.ip }}</a>) {{ log.method }} <a onclick="document.location='?filter=path&path={{ log.path }}'">to "{{ log.path }}"</a> {% if log.data %}<a onclick="document.location='?filter=data&data={{ log.data }}'">data: {{ log.data }}</a>{% endif %}</a></p>
+        <p>
+            <a href="{% url "logs_detail" log.pk %}">[{{ log.date|date:"G:i:s" }}] <a onclick="document.location='?filter=author&author={{ log.author }}'">{{ log.author }}</a> (<a onclick="document.location='?filter=ip&ip={{ log.ip }}'">{{ log.ip }}</a>) {{ log.method }} <a onclick="document.location='?filter=path&path={{ log.path }}'">to "{{ log.path }}"</a> {% if log.data %}<a onclick="document.location='?filter=data&data={{ log.data }}'">data: {{ log.data }}</a>{% endif %}</a></p>
     {% endfor %}
 {% endblock %}

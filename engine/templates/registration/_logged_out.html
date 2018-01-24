@@ -1,0 +1,8 @@
+{% extends "engine/base.html" %}
+
+{% block content %}
+    <br><br><br><br><br>
+<p>Logged out!</p>
+
+<a href="{% url 'accounts:login'%}">Click here to login again.</a>
+{% endblock %}
