@@ -33,6 +33,10 @@ def declare_category_list():
     categories = ""
     for category in Category.objects.all():
         categories += category.name + "|"
+    if not categories:
+        Category.objects.create(name="all")
+        Category.objects.create(name="news")
+        return "all|news"
     return categories[0:-1]
 
 
@@ -47,7 +51,10 @@ def declare_static_pages_list():
     return pages[0:-1]
 
 
-static_pages_list = declare_static_pages_list()
+try:
+    static_pages_list = declare_static_pages_list()
+except:
+    static_pages_list = "|"
 
 
 def reload(request):
