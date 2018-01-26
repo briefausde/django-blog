@@ -225,60 +225,15 @@ def remove_comment(request):
     return redirect('/')
 
 
-def login(request):
-    # if not request.user.is_authenticated():
-    #     if request.method == "POST":
-    #         username = request.POST['username']
-    #         logs_add(request, '[trying_login]' + username)
-    #         password = request.POST['password']
-    #         user = auth_authenticate(username=username, password=password)
-    #         # from django.contrib.auth.validators import ASCIIUsernameValidator
-    #         # username_validator = ASCIIUsernameValidator()
-    #         if user is not None:
-    #             if user.is_active:
-    #                 auth_login(request, user)
-    #                 logs_add(request, '[login]' + username)
-    #                 next_url = request.GET.get('next', '')
-    #                 if next_url and (next_url is not "/accounts/logout/"):
-    #                     return redirect(next_url)
-    #                 else:
-    #                     return redirect('main')
-    #             else:
-    #                 return render(request, 'engine/auth/_login.html', {'text': 1})
-    #         else:
-    #             return render(request, 'engine/auth/_login.html', {'text': 2})
-    #     else:
-    #         form = AuthForm()
-    #     return render(request, 'engine/auth/_login.html', {'form': form})
-    # else:
-    #     return redirect('main')
-    print("login")
-    return reverse('main')
-
-
 def register():
-    print("register")
-    return reverse('main')
+    return reverse("accounts:register_done")
 
 
-@login_required(login_url='/auth/login/')
-def change_password(request):
-    logs_add(request)
-    if request.method == 'POST':
-        form = PasswordChangeForm(user=request.user, data=request.POST)
-        if form.is_valid():
-            form.save()
-            update_session_auth_hash(request, form.user)
-    else:
-        form = PasswordChangeForm(user=request.user)
-    return render(request, 'engine/auth/login.html', {'form': form})
+class RegisterDoneView(generic.TemplateView):
+    template_name = "registration/_register_done.html"
 
-
-@login_required(login_url='/auth/login/')
-def logout(request):
-    logs_add(request, '[logout]' + str(request.user))
-    auth_logout(request)
-    return render(request, 'engine/auth/logout.html')
+    def get_context_data(self, **kwargs):
+        return super(RegisterDoneView, self).get_context_data()
 
 
 class PostCreateView(LoginRequiredMixin, generic.CreateView):

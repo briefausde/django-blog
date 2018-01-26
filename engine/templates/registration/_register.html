@@ -22,7 +22,7 @@
             </form>
         </div>
 
-        <a href="{% url 'accounts:login' %}">Если у вас уже есть аккаунт, вы можете ввойти</a>
+        <p><a href="{% url 'accounts:login' %}">Sign in</a></p>
 
         {% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
         {% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}

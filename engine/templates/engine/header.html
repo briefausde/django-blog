@@ -37,7 +37,7 @@
 					{% if user.is_authenticated %}
 					<li><a href="{% url 'user_profile' username=request.user %}"><img src="http://thegardenwests.com.au/wp-content/uploads/2016/06/The-Garden-Restaurant-West-Ashfield-Site-Icon-Green.png" width="43px" height="43px" title="user-name" />{{ request.user }}</a></li>
 					{% else %}
-					<li><a href="{% url 'accounts:login' %}"><img src="http://thegardenwests.com.au/wp-content/uploads/2016/06/The-Garden-Restaurant-West-Ashfield-Site-Icon-Green.png" width="43px" height="43px" title="user-name" />Login/Reg</a></li>
+					<li><a href="{% url 'accounts:login' %}"><img src="http://thegardenwests.com.au/wp-content/uploads/2016/06/The-Garden-Restaurant-West-Ashfield-Site-Icon-Green.png" width="43px" height="43px" title="user-name" />Sign in/up</a></li>
 					{% endif %}
 				</ul>
 			</div>

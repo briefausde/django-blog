@@ -18,6 +18,7 @@ sitemaps = {
 }
 
 # разобраться с шаблонами и подтверждением
+# добавить логи, сдлать в register get_success_url=reverse_lazy("accounts:register_done")
 accounts_urlpatterns = [
     url(r'^login/$', LoginView.as_view(template_name="registration/_login.html"), name='login'),
     url(r'^logout/$', LogoutView.as_view(template_name="registration/_logged_out.html"), name='logout'),
@@ -29,8 +30,9 @@ accounts_urlpatterns = [
     url(r'^password_reset/confirm/$', PasswordResetConfirmView.as_view(success_url=reverse_lazy('accounts:password_reset_complete'), template_name="registration/_password_reset_confirm.html"), name='password_reset_confirm'),
     url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         PasswordResetConfirmView.as_view(success_url=reverse_lazy('accounts:password_reset_confirm'), template_name="registration/_password_reset_done.html"), name='password_reset_confirm'),
-    url(r'^register/$', (CreateView.as_view(model=User, get_success_url=views.register, form_class=UserCreationForm,
-                                                     template_name="engine/auth/register.html")), name='register'),
+    url(r'^register/$', CreateView.as_view(model=User, get_success_url=views.register, form_class=UserCreationForm,
+                                           template_name="registration/_register.html"), name='register'),
+    url(r'^register/done/$', views.RegisterDoneView.as_view(), name='register_done'),
 ]
 
 urlpatterns = [

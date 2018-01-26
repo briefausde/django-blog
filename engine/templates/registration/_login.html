@@ -1,7 +1,8 @@
 {% extends "engine/base.html" %}
 
 {% block content %}
-<br><br><br><br><br><br>
+<div id="main" role="main">
+<div class="table-form">
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
@@ -15,7 +16,8 @@
     {% endif %}
 {% endif %}
 
-<form method="post" action="{% url 'accounts:login' %}">
+
+<form method="post" action="{% url 'accounts:login' %}" class="auth-form">
 {% csrf_token %}
 
 <div>
@@ -33,7 +35,9 @@
 </div>
 </form>
 
+<p><a href="{% url 'accounts:register' %}">Sign up</a></p>
 {# Assumes you setup the password_reset view in your URLconf #}
 <p><a href="{% url 'accounts:password_reset' %}">Lost password?</a></p>
 
+</div></div>
 {% endblock %}
