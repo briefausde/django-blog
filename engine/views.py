@@ -97,14 +97,6 @@ def get_paginator_posts(posts, pk, count):
     return posts
 
 
-def get_posts(category_name):
-    if (category_name == "all") or (category_name not in category_list):
-        return Post.objects.filter(created_date__lte=timezone.now()).order_by('-created_date')
-    else:
-        return Post.objects.filter(category__name=category_name,
-                                   created_date__lte=timezone.now()).order_by('category', '-created_date')
-
-
 class StaticPageView(generic.TemplateView):
     model = StaticPage
     template_name = ''
@@ -331,24 +323,6 @@ def create_indexes():
         print("For {0} created index {1}".format(key, indexes[key]))
 
 
-'''
-def create_indexes():
-    posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
-    indexes = {}
-    for post in posts:
-        words = split_str(post.text_big)
-        for word in words:
-            if len(word) > 1:
-                if not indexes.get(word):
-                    indexes[word] = set()
-                indexes[word].add(post.pk)
-    del posts
-    for key in indexes:
-        Index.objects.create(word=key, index=indexes[key])
-        print("For {0} created index {1}".format(key, indexes[key]))
-'''
-
-
 def add_index(pk):
     post = get_object_or_404(Post, pk=pk)
     words = split_str(post.text_big)
@@ -381,24 +355,6 @@ def find(search_request):
     return posts
 
 
-# def find_word(request, pk=1):
-#     word = request.GET.get('q', '')
-#     logs_add(request, data=word)
-#     if not word:
-#         return render(request, 'engine/search.html', {})
-#
-#     if (len(word) < 3) or (len(word) > 120):
-#         return render(request, 'engine/search.html', {'search_text': word, 'text': 2})
-#
-#     posts = find(word)
-#     if posts:
-#         return render(request, 'engine/post_list.html', {'posts': get_paginator_posts(posts, pk, 15),
-#                                                          'query': word,
-#                                                          'search_text': word})
-#     else:
-#         return render(request, 'engine/search.html', {'search_text': word, 'text': 1})
-
-
 class SearchListView(generic.ListView):
     model = Post
     context_object_name = 'posts'
@@ -408,20 +364,17 @@ class SearchListView(generic.ListView):
         context = super(SearchListView, self).get_context_data()
         word = self.request.GET.get('q', '')
         logs_add(self.request, data=word)
-
         context['search_text'] = word
+
         if (len(word) < 3) or (len(word) > 120):
             context['text'] = "Search query should be from 3 to 120 characters"
         else:
             posts = find(word)
             if posts:
                 self.template_name = "engine/post_list.html"
-                context['posts'] = get_paginator_posts(posts, 1, 15)
+                context['posts'] = get_paginator_posts(posts, self.request.GET.get('pk', 1), 15)
                 context['query'] = word
             else:
-                context['text'] = "We can't find you'r query"
+                context['text'] = "Nothing find"
 
         return context
-
-
-# add_index(3)
