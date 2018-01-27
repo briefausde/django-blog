@@ -169,6 +169,21 @@ class UserDetailsView(generic.DetailView):
         return get_object_or_404(self.model, username=self.kwargs['username'])
 
 
+@login_required(login_url='/accounts/login/')
+def user_block_unblock(request, username):
+    if request.user.is_staff:
+        if request.POST:
+            logs_add(request, username)
+            user = get_object_or_404(User, username=username)
+            if not user.is_staff:
+                if user.is_active:
+                    user.is_active = False
+                else:
+                    user.is_active = True
+                user.save()
+    return redirect('/')
+
+
 class CommentsListView(generic.ListView):
     model = Comment
     context_object_name = 'comments'

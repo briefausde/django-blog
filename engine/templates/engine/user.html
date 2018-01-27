@@ -1,10 +1,25 @@
 {% extends 'engine/base.html' %}
 
 {% block content %}
+{% if request.user.is_staff %}
+<script type="text/javascript">
+	function AjaxUserBlockUnblock(){
+        $.ajax({
+            url: "{% url 'user_block_unblock' user.username %}",
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+        });
+    }
+</script>
+{% endif %}
+
     <div id="main" role="main">
         <div class="row">
             <div class="feature-box">
                 <div class="story-teaser_banner">
+                    {% if request.user.is_staff %}<p onclick="AjaxUserBlockUnblock()">{% if user.is_active %}BLOCK{% else %}UNBLOCK{% endif %}</p>{% endif %}
                     <div class="story-teaser_image">
                         <img src="https://pp.userapi.com/c840528/v840528370/398ff/roakpMjUfoo.jpg" style="width:47%;height:246px">
                     </div>
