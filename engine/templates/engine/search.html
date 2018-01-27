@@ -10,10 +10,7 @@
     <form method="POST" class="search-form" id="search">{% csrf_token %}
     <input class="js-searchInput textInput textInput--jumbo textInput--underlined u-marginBottom40" type="search" id="searchText" placeholder="Search" value="{{ search_text }}" maxlength="300">
     </form>
-    {% if text == 1 %}<br><br>We can't find you'r query<br><br>
-    {% endif %}
-    {% if text == 2 %}<br><br>Search query should be from 3 to 120 charachters<br><br>
-    {% endif %}
+    {% if text %}<br><br>{{ text }}<br><br>{% endif %}
 </div>
 </center>
 
