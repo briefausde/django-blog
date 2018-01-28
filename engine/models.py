@@ -1,14 +1,6 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.sitemaps import Sitemap
-from django.contrib.auth.models import AbstractBaseUser
-
-
-# model user with manytomany throught categories to articles
-# model user_categories
-# model categories with foreign key to user and foreign key to articles
-# model user_articles
-# model articles with manytomany throught categories to users
 
 
 class StaticPage(models.Model):
@@ -71,6 +63,7 @@ class Post(models.Model):
 
 
 '''
+from django.contrib.auth.models import AbstractBaseUser
 class MyUser(AbstractBaseUser):
     email = models.EmailField(
                         verbose_name='email address',

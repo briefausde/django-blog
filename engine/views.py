@@ -103,7 +103,6 @@ class StaticPageView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         url = self.kwargs['page_name']
         logs_add(self.request, url)
-        # добавить обработку ошибки если файла с шаблоном не существует
         self.template_name = 'engine/static/' + get_object_or_404(self.model, url=url).template_name
         return super(StaticPageView, self).get_context_data()
 
