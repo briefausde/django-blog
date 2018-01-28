@@ -5,7 +5,11 @@
     function updateComments() {
         $.ajax({
             url: "{% url 'comments' post.pk %}",
+            type: 'POST',
             cache: false,
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
             success: function(html){
                 $("#comments").html(html);
             }

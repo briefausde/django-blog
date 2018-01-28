@@ -1,24 +1,24 @@
 # from django.utils.decorators import method_decorator
 # from django.http import HttpResponse, Http404
+# from django.contrib.auth import update_session_auth_hash
+# from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate as auth_authenticate
+# from django.contrib.auth.forms import PasswordChangeForm
+# from django.template import TemplateDoesNotExist
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate as auth_authenticate
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-from django.template import TemplateDoesNotExist
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
 from django.utils import timezone
 from django.views import generic
 from django.urls import reverse
-from .forms import AuthForm, PostForm
+from .forms import PostForm
 from .models import Post, Log, Category, Comment, StaticPage, Index
 from re import sub
 
 
-# запретить доставать комменты с /comments/id get запросом, только лишь post
 # оптимизация базы
 # выключить debug
 # cache
@@ -57,10 +57,9 @@ except:
     static_pages_list = "|"
 
 
+@staff_member_required
 def reload(request):
     logs_add(request)
-    if not request.user.is_superuser:
-        return redirect("main")
     delete_indexes()
     create_indexes()
     return redirect('main')
@@ -169,28 +168,35 @@ class UserDetailsView(generic.DetailView):
         return get_object_or_404(self.model, username=self.kwargs['username'])
 
 
-@login_required(login_url='/accounts/login/')
+@staff_member_required
 def user_block_unblock(request, username):
-    if request.user.is_staff:
-        if request.POST:
-            logs_add(request, username)
-            user = get_object_or_404(User, username=username)
-            if not user.is_staff:
-                if user.is_active:
-                    user.is_active = False
-                else:
-                    user.is_active = True
-                user.save()
+    if request.POST:
+        logs_add(request, username)
+        user = get_object_or_404(User, username=username)
+        if not user.is_staff:
+            if user.is_active:
+                user.is_active = False
+            else:
+                user.is_active = True
+            user.save()
     return redirect('/')
 
 
-class CommentsListView(generic.ListView):
-    model = Comment
-    context_object_name = 'comments'
-    template_name = 'engine/comments.html'
+# class CommentsListView(generic.ListView):
+#     model = Comment
+#     context_object_name = 'comments'
+#     template_name = 'engine/comments.html'
+#
+#     def get_queryset(self):
+#         print(self.request.method)
+#         return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
-    def get_queryset(self):
-        return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
+
+def comment_list(request, post_id):
+    if request.POST:
+        comments = Comment.objects.filter(post__pk=post_id).order_by('-pk')
+        return render(request, 'engine/comments.html', {'comments': comments})
+    return redirect('/')
 
 
 @login_required(login_url='/accounts/login/')
