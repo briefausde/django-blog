@@ -9,24 +9,30 @@ from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.template.context_processors import csrf
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
 from django.utils import timezone
 from django.views import generic
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from .forms import PostForm
 from .models import Post, Log, Category, Comment, StaticPage, Index
-from re import sub
 
 
-# оптимизация базы
+# Js в отдельный файл и убрать из html
+# Убрать declare и делать это через пустую миграцию и не передавать лист
+# Django static flatpages
+# В utils все def
+# Убрать логи
+# Python manage.py commands
+# Js (jQuery), databases, book, Django REST
+
 # выключить debug
 # cache
 # from django.views.decorators.cache import cache_page
 # from django.core.cache import cache
 # cache.clear()
 # @cache_page(120, key_prefix="main")
-
 
 # always restart server after appending new category
 def declare_category_list():
@@ -57,14 +63,6 @@ except:
     static_pages_list = "|"
 
 
-@staff_member_required
-def reload(request):
-    logs_add(request)
-    delete_indexes()
-    create_indexes()
-    return redirect('main')
-
-
 def logs_add(request, data=""):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
     Log.objects.create(ip=ip,
@@ -77,14 +75,6 @@ def logs_add(request, data=""):
                        data=str(data).strip(),
                        date=timezone.now()
                        )
-
-
-def url_refactor(text):
-    return str.lower(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', text.replace("-", " ")).replace(" ", "-"))
-
-
-def split_str(string):
-    return set(str.upper(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', string).replace("  ", " ")).split(" "))
 
 
 def get_paginator_posts(posts, pk, count):
@@ -167,59 +157,50 @@ class UserDetailsView(generic.DetailView):
         return get_object_or_404(self.model, username=self.kwargs['username'])
 
 
+@require_POST
 @staff_member_required
 def user_block_unblock(request, username):
-    if request.POST:
-        logs_add(request, username)
-        user = get_object_or_404(User, username=username)
-        if not user.is_staff:
-            if user.is_active:
-                user.is_active = False
-            else:
-                user.is_active = True
-            user.save()
-    return redirect('/')
+    logs_add(request, username)
+    user = get_object_or_404(User, username=username)
+    if not user.is_staff:
+        if user.is_active:
+            user.is_active = False
+        else:
+            user.is_active = True
+        user.save()
 
 
-# class CommentsListView(generic.ListView):
-#     model = Comment
-#     context_object_name = 'comments'
-#     template_name = 'engine/comments.html'
-#
-#     def get_queryset(self):
-#         print(self.request.method)
-#         return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
+class CommentsListView(generic.ListView):
+    model = Comment
+    context_object_name = 'comments'
+    template_name = 'engine/comments.html'
+
+    def get_queryset(self):
+        return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
-def comment_list(request, post_id):
-    if request.POST:
-        comments = Comment.objects.filter(post__pk=post_id).order_by('-pk')
-        return render(request, 'engine/comments.html', {'comments': comments})
-    return redirect('/')
-
-
+@require_POST
 @login_required(login_url='/accounts/login/')
 def add_comment(request, post_id):
-    if request.POST:
-        post = get_object_or_404(Post, pk=post_id)
-        text = request.POST.get('text')
-        text = text.strip()
-        logs_add(request, text)
-        if text != '':
-            comment = Comment.objects.create(author=request.user, text=text, post=post, created_date=timezone.now())
-            comment.save()
+    post = get_object_or_404(Post, pk=post_id)
+    text = request.POST.get('text')
+    text = text.strip()
+    logs_add(request, text)
+    if text != '':
+        comment = Comment.objects.create(author=request.user, text=text, post=post, created_date=timezone.now())
+        comment.save()
     return redirect('/')
 
 
+@require_POST
 @login_required(login_url='/accounts/login/')
 def remove_comment(request):
-    if request.method == "POST":
-        comment_id = str(request.body).split("=")[2][0:-1]
-        logs_add(request, comment_id)
-        user = request.user
-        comment = get_object_or_404(Comment, pk=comment_id)
-        if user == comment.author or user.is_staff:
-            comment.delete()
+    comment_id = int(request.POST.get("id"))
+    logs_add(request, comment_id)
+    user = request.user
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if user == comment.author or user.is_staff:
+        comment.delete()
     return redirect('/')
 
 
@@ -316,63 +297,7 @@ class PostDetailsView(generic.DetailView):
         return context
 
     def get_object(self):
-        return Post.objects.filter(url=url_refactor(self.kwargs['name'])).first()
-
-
-def delete_indexes():
-    Index.objects.all().delete()
-    print("All indexes deleted")
-
-
-def create_indexes():
-    last_pk = Post.objects.order_by('-pk')[0].pk
-    indexes = {}
-    for i in range(1, last_pk+1):
-        try:
-            post = get_object_or_404(Post, pk=i)
-            words = split_str(post.text_big)
-            for word in words:
-                if len(word) > 1:
-                    if not indexes.get(word):
-                        indexes[word] = set()
-                    indexes[word].add(post.pk)
-        except:
-            None
-    for key in indexes:
-        Index.objects.create(word=key, index=indexes[key])
-        print("For {0} created index {1}".format(key, indexes[key]))
-
-
-def add_index(pk):
-    post = get_object_or_404(Post, pk=pk)
-    words = split_str(post.text_big)
-    for word in words:
-        if len(word) > 1:
-            indexes = set()
-            try:
-                indexes = get_object_or_404(Index, word=word).getindex()
-                indexes.add(pk)
-                Index.objects.filter(word=word).update(index=indexes)
-            except:
-                indexes.add(pk)
-                Index.objects.create(word=word, index=indexes)
-
-
-def find(search_request):
-    search_words = split_str(search_request)
-    posts = []
-    try:
-        for key in search_words:
-            posts.append(get_object_or_404(Index, word=key).getindex())
-        rez = posts[0]
-        for i in range(len(posts) - 1):
-            rez = set(posts[i]) & set(posts[i + 1])
-        posts = []
-        for i in rez:
-            posts.append(Post.objects.get(pk=i))
-    except:
-        None
-    return posts
+        return Post.objects.filter(url=Post.url_refactoring(Post, self.kwargs['name'])).first()
 
 
 class SearchListView(generic.ListView):
@@ -389,7 +314,7 @@ class SearchListView(generic.ListView):
         if (len(word) < 3) or (len(word) > 120):
             context['text'] = "Search query should be from 3 to 120 characters"
         else:
-            posts = find(word)
+            posts = Index.find(Index, word)
             if posts:
                 self.template_name = "engine/post_list.html"
                 context['posts'] = get_paginator_posts(posts, self.request.GET.get('pk', 1), 15)

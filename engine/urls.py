@@ -1,5 +1,4 @@
 from django.conf.urls import url, include
-
 from . import views
 from .models import EngineSitemap
 from django.contrib.sitemaps.views import sitemap
@@ -7,6 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.views.generic import CreateView
 from django.contrib.auth.views import *
+from engine.utils import reload
 
 
 categories_list = views.category_list
@@ -55,10 +55,9 @@ urlpatterns = [
     url(r'^logs/$', views.LogsView.as_view(), name='logs_view'),
     url(r'^logs_list/$', views.LogsListView.as_view(), name='logs_list'),
     url(r'^logs/(?P<pk>[0-9]+)/$', views.LogDetailsView.as_view(), name='logs_detail'),
-    url(r'^reload/$', views.reload, name='reload'),
+    url(r'^reload/$', reload, name='reload'),
     url(r'^accounts/', include(accounts_urlpatterns, namespace='accounts')),
-    # url(r'^comments/(?P<post_id>[\d+]*)$', views.CommentsListView.as_view(), name='comments'),
-    url(r'^comments/(?P<post_id>[\d+]*)$', views.comment_list, name='comments'),
+    url(r'^comments/(?P<post_id>[\d+]*)$', views.CommentsListView.as_view(), name='comments'),
     url(r'^add_comment/(?P<post_id>[\d+]*)$', views.add_comment, name='add_comment'),
     url(r'^remove_comment/$', views.remove_comment, name='remove_comment'),
     url(r'^user_block_unblock/(?P<username>[-\w]+)$$', views.user_block_unblock, name='user_block_unblock'),
