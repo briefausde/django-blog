@@ -6,14 +6,6 @@ from django.utils import timezone
 from django.contrib.sitemaps import Sitemap
 
 
-class StaticPage(models.Model):
-    url = models.CharField(max_length=100)
-    template_name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.url
-
-
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
 

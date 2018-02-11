@@ -1,33 +1,6 @@
 {% extends 'engine/base.html' %}
 
 {% block content %}
-<script type="text/javascript">
-    function updateComments() {
-        $.ajax({
-            url: "{% url 'comments' post.pk %}",
-            success: function(html){
-                $("#comments").html(html);
-            }
-        });
-    }
-    $(document).ready(function(){
-        updateComments();
-        setInterval('updateComments()', 10000);
-    });
-	function AjaxRemoveComment(comment_id){
-        $.ajax({
-            url: "{% url 'remove_comment' %}",
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-				id: comment_id
-            },
-            success: function(){
-                updateComments();
-            }
-        });
-    }
-</script>
     <div class="single-page">
         <div class="single-page-artical">
             <div class="artical-content">
@@ -54,30 +27,8 @@
            			<div class="artical-commentbox">
 	               		<div class="table-form">
 							{% if post.comments_mode %}
-	                   		<form id="form" method="POST" name="post_comment" onsubmit="getAjax()" action="javascript:void(null);">{% csrf_token %}
+	                   		<form id="form-comment" method="POST" name="post_comment" onsubmit="getAjax()" action="javascript:void(null);">{% csrf_token %}
                                    <textarea id="id_text" class="form-control" placeholder="Input your comment and press ENTER" name="text" style="width:87%;height:50px"></textarea>
-								<script type="text/javascript">
-	                   				function getAjax() {
-	                       				var textComment   = $('#form').serialize();
-	                       				$.ajax({
-	                           				url: "{% url 'add_comment' post.pk %}",
-	                           				type: 'POST',
-	                           				data: textComment,
-	                           				success: function(){
-	                               				updateComments();
-	                           				}
-										});
-										$("#id_text").val('');
-										$("#id_text").blur();
-									}
-	                   				$(document).ready(function(){
-	                       				$("#id_text").keypress(function(e){
-	                           				if(e.keyCode==13){
-	                               				$("#form").submit();
-	                           				}
-	                       				});
-	                   				});
-	               				</script>
 	                   		</form>
 							{% endif %}
 	               		</div>
@@ -91,4 +42,51 @@
 	    	</div>
 		</div>
     </div>
+
+    <script type="text/javascript">
+        function updateComments() {
+            $.ajax({
+                url: "{% url 'comments' post.pk %}",
+                success: function(html){
+                    $("#comments").html(html);
+                }
+            });
+        }
+        function AjaxRemoveComment(comment_id){
+            $.ajax({
+                url: "{% url 'remove_comment' %}",
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    id: comment_id
+                },
+                success: function(){
+                    updateComments();
+                }
+            });
+        }
+        function getAjax() {
+            var textComment = $('#form-comment').serialize();
+            console.log(textComment)
+            $.ajax({
+                url: "{% url 'add_comment' post.pk %}",
+                type: 'POST',
+                data: textComment,
+                success: function(){
+                    updateComments();
+                }
+            });
+            $("#id_text").val('');
+            $("#id_text").blur();
+        }
+        $(document).ready(function(){
+            updateComments();
+            setInterval('updateComments()', 10000);
+            $("#id_text").keypress(function(e){
+                if(e.keyCode==13){
+                    $("#form-comment").submit();
+                }
+            });
+        });
+</script>
 {% endblock %}

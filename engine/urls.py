@@ -7,14 +7,12 @@ from django.contrib.auth.models import User
 from django.views.generic import CreateView
 from django.contrib.auth.views import *
 from engine.utils import reload
-
-
-categories_list = views.category_list
-static_pages_list = views.static_pages_list
+from django.contrib.flatpages.sitemaps import FlatPageSitemap
 
 
 sitemaps = {
-    "blog": EngineSitemap
+    "pages": EngineSitemap,
+    "flatpages": FlatPageSitemap
 }
 
 # разобраться с шаблонами и подтверждением
@@ -35,6 +33,7 @@ accounts_urlpatterns = [
     url(r'^register/done/$', views.RegisterDoneView.as_view(), name='register_done'),
 ]
 
+
 urlpatterns = [
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     url(r'^$', views.PostsListView.as_view(), name='main'),
@@ -42,13 +41,8 @@ urlpatterns = [
     url(r'^post/new/$', views.PostCreateView.as_view(), name='post_new'),
     url(r'^edit/(?P<pk>[0-9]+)/$', views.PostEditView.as_view(), name='post_edit'),
     url(r'^article/(?P<name>[-\w]+)$', views.PostDetailsView.as_view(), name='post_detail'),
-    url(r'^(?P<category_name>%s)/$' % categories_list,
-        views.PostsListView.as_view(),
-        name='get_from_category'),
-    url(r'^(?P<category_name>%s)/(?P<pk>[0-9]+)$' % categories_list,
-        views.PostsListView.as_view(),
-        name='get_from_category_pages'),
-    url(r'^(?P<page_name>%s)$' % static_pages_list, views.StaticPageView.as_view(), name='load_static_page'),
+    url(r'^category/(?P<category_name>[-\w]+)$', views.PostsListView.as_view(), name='get_from_category'),
+    url(r'^category/(?P<category_name>[-\w]+)/(?P<pk>[0-9]+)$', views.PostsListView.as_view(), name='get_from_category_pages'),
     url(r'^search/$', views.SearchListView.as_view(), name='find_word'),
     url(r'^search/(?P<pk>[0-9]+)/$', views.SearchListView.as_view(), name='find_word_pages'),
     url(r'^user/(?P<username>[-\w]+)$', views.UserDetailsView.as_view(), name='user_profile'),
@@ -61,4 +55,5 @@ urlpatterns = [
     url(r'^add_comment/(?P<post_id>[\d+]*)$', views.add_comment, name='add_comment'),
     url(r'^remove_comment/$', views.remove_comment, name='remove_comment'),
     url(r'^user_block_unblock/(?P<username>[-\w]+)$$', views.user_block_unblock, name='user_block_unblock'),
+    url(r'', include('django.contrib.flatpages.urls')),
 ]

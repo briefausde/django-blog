@@ -10,21 +10,19 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.template.context_processors import csrf
 from django.shortcuts import get_object_or_404, redirect
-from django.core.paginator import Paginator, EmptyPage
 from django.utils import timezone
 from django.views import generic
 from django.urls import reverse
+from engine.utils import paginator
 from django.views.decorators.http import require_POST
 from .forms import PostForm
-from .models import Post, Log, Category, Comment, StaticPage, Index
+from .models import Post, Log, Category, Comment, Index
 
 
 # Js в отдельный файл и убрать из html
-# Убрать declare и делать это через пустую миграцию и не передавать лист
-# Django static flatpages
-# В utils все def
 # Убрать логи
 # Python manage.py commands
+# add_coment, remove_comment поменять на view
 # Js (jQuery), databases, book, Django REST
 
 # выключить debug
@@ -33,34 +31,6 @@ from .models import Post, Log, Category, Comment, StaticPage, Index
 # from django.core.cache import cache
 # cache.clear()
 # @cache_page(120, key_prefix="main")
-
-# always restart server after appending new category
-def declare_category_list():
-    categories = ""
-    for category in Category.objects.all():
-        categories += category.name + "|"
-    if not categories:
-        Category.objects.create(name="all")
-        Category.objects.create(name="news")
-        return "all|news"
-    return categories[0:-1]
-
-
-category_list = declare_category_list()
-
-
-# always restart server after appending new static_page
-def declare_static_pages_list():
-    pages = ""
-    for page in StaticPage.objects.all():
-        pages += page.url + "|"
-    return pages[0:-1]
-
-
-try:
-    static_pages_list = declare_static_pages_list()
-except:
-    static_pages_list = "|"
 
 
 def logs_add(request, data=""):
@@ -75,26 +45,6 @@ def logs_add(request, data=""):
                        data=str(data).strip(),
                        date=timezone.now()
                        )
-
-
-def get_paginator_posts(posts, pk, count):
-    pg = Paginator(posts, count)
-    try:
-        posts = pg.page(int(pk))
-    except EmptyPage:
-        posts = pg.page(pg.num_pages)
-    return posts
-
-
-class StaticPageView(generic.TemplateView):
-    model = StaticPage
-    template_name = ''
-
-    def get_context_data(self, **kwargs):
-        url = self.kwargs['page_name']
-        logs_add(self.request, url)
-        self.template_name = 'engine/static/' + get_object_or_404(self.model, url=url).template_name
-        return super(StaticPageView, self).get_context_data()
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
@@ -183,7 +133,7 @@ class CommentsListView(generic.ListView):
 @login_required(login_url='/accounts/login/')
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    text = request.POST.get('text')
+    text = request.POST.get('text', '')
     text = text.strip()
     logs_add(request, text)
     if text != '':
@@ -266,16 +216,17 @@ class PostsListView(generic.ListView):
         category = self.kwargs.get('category_name', 'all')
         pk = self.kwargs.get('pk', 1)
 
-        if (category in category_list) and (category != "all"):
+        if category != "all":
             context['category'] = category
-            posts = Post.objects.filter(category__name=category,
-                                        created_date__lte=timezone.now()).order_by('category', '-created_date')
+            if get_object_or_404(Category, name=category):
+                posts = Post.objects.filter(category__name=category,
+                                            created_date__lte=timezone.now()).order_by('category', '-created_date')
         else:
             if pk != 1:
                 context['category'] = "all"
             posts = Post.objects.filter(created_date__lte=timezone.now()).order_by('-created_date')
 
-        context['posts'] = get_paginator_posts(posts, pk, 15)
+        context['posts'] = paginator(posts, pk, 15)
         return context
 
 
@@ -317,7 +268,7 @@ class SearchListView(generic.ListView):
             posts = Index.find(Index, word)
             if posts:
                 self.template_name = "engine/post_list.html"
-                context['posts'] = get_paginator_posts(posts, self.request.GET.get('pk', 1), 15)
+                context['posts'] = paginator(posts, self.request.GET.get('pk', 1), 15)
                 context['query'] = word
             else:
                 context['text'] = "Nothing find"
