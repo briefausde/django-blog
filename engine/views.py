@@ -33,20 +33,6 @@ from .models import Post, Log, Category, Comment, Index
 # @cache_page(120, key_prefix="main")
 
 
-def logs_add(request, data=""):
-    ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
-    Log.objects.create(ip=ip,
-                       author=request.user,
-                       method=request.method,
-                       path=request.path,
-                       body=str(request.body).strip(),
-                       cookies=str(request.COOKIES),
-                       meta=str(request.META),
-                       data=str(data).strip(),
-                       date=timezone.now()
-                       )
-
-
 class StaffRequiredMixin(LoginRequiredMixin):
     raise_exception = True
 
@@ -54,6 +40,21 @@ class StaffRequiredMixin(LoginRequiredMixin):
         if not request.user.is_staff:
             return self.handle_no_permission()
         return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
+class LogMixin(object):
+    def dispatch(self, request, *args, **kwargs):
+        ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
+        Log.objects.create(ip=ip,
+                           author=request.user,
+                           method=request.method,
+                           path=request.path,
+                           body=str(request.body).strip(),
+                           cookies=str(request.COOKIES),
+                           meta=str(request.META),
+                           date=timezone.now()
+                           )
+        return super(LogMixin, self).dispatch(request, *args, **kwargs)
 
 
 class LogsView(StaffRequiredMixin, generic.TemplateView):
@@ -93,24 +94,21 @@ class LogDetailsView(StaffRequiredMixin, generic.DetailView):
     template_name = 'engine/logs_detail.html'
 
     def get_object(self):
-        logs_add(self.request)
         return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
 
-class UserDetailsView(generic.DetailView):
+class UserDetailsView(LogMixin, generic.DetailView):
     model = User
     context_object_name = 'user'
     template_name = 'engine/user.html'
 
     def get_object(self):
-        logs_add(self.request)
         return get_object_or_404(self.model, username=self.kwargs['username'])
 
 
 @require_POST
 @staff_member_required
 def user_block_unblock(request, username):
-    logs_add(request, username)
     user = get_object_or_404(User, username=username)
     if not user.is_staff:
         if user.is_active:
@@ -135,7 +133,6 @@ def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     text = request.POST.get('text', '')
     text = text.strip()
-    logs_add(request, text)
     if text != '':
         comment = Comment.objects.create(author=request.user, text=text, post=post, created_date=timezone.now())
         comment.save()
@@ -146,7 +143,6 @@ def add_comment(request, post_id):
 @login_required(login_url='/accounts/login/')
 def remove_comment(request):
     comment_id = int(request.POST.get("id"))
-    logs_add(request, comment_id)
     user = request.user
     comment = get_object_or_404(Comment, pk=comment_id)
     if user == comment.author or user.is_staff:
@@ -158,14 +154,11 @@ def register():
     return reverse("accounts:register_done")
 
 
-class RegisterDoneView(generic.TemplateView):
+class RegisterDoneView(LogMixin, generic.TemplateView):
     template_name = "registration/_register_done.html"
 
-    def get_context_data(self, **kwargs):
-        return super(RegisterDoneView, self).get_context_data()
 
-
-class PostCreateView(LoginRequiredMixin, generic.CreateView):
+class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
     form_class = PostForm
     template_name = 'engine/post_new_edit.html'
 
@@ -191,30 +184,25 @@ class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
-class PostEditView(AuthorOrStaffRequiredMixin, generic.UpdateView):
+class PostEditView(AuthorOrStaffRequiredMixin, LogMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'engine/post_new_edit.html'
 
     def get_success_url(self):
-        # return '/article/{}'.format(self.object.url)
         return reverse('post_detail', args=(self.object.url,))
 
-    def get_context_data(self, **kwargs):
-        logs_add(self.request)
-        return super(PostEditView, self).get_context_data()
 
-
-class PostsListView(generic.ListView):
+class PostsListView(LogMixin, generic.ListView):
     model = Post
     context_object_name = 'posts'
     template_name = 'engine/post_list.html'
 
     def get_context_data(self, **kwargs):
-        logs_add(self.request)
         context = super(PostsListView, self).get_context_data(**kwargs)
         category = self.kwargs.get('category_name', 'all')
         pk = self.kwargs.get('pk', 1)
+        posts = []
 
         if category != "all":
             context['category'] = category
@@ -230,13 +218,12 @@ class PostsListView(generic.ListView):
         return context
 
 
-class PostDetailsView(generic.DetailView):
+class PostDetailsView(LogMixin, generic.DetailView):
     model = Post
     context_object_name = 'post'
     template_name = 'engine/post_detail.html'
 
     def get_context_data(self, **kwargs):
-        logs_add(self.request)
         post = self.get_object()
         post.views += 1
         post.save()
@@ -251,7 +238,7 @@ class PostDetailsView(generic.DetailView):
         return Post.objects.filter(url=Post.url_refactoring(Post, self.kwargs['name'])).first()
 
 
-class SearchListView(generic.ListView):
+class SearchListView(LogMixin, generic.ListView):
     model = Post
     context_object_name = 'posts'
     template_name = "engine/search.html"
@@ -259,7 +246,6 @@ class SearchListView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(SearchListView, self).get_context_data()
         word = self.request.GET.get('q', '')
-        logs_add(self.request, data=word)
         context['search_text'] = word
 
         if (len(word) < 3) or (len(word) > 120):

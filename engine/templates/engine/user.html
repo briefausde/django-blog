@@ -21,7 +21,7 @@
                 <div class="story-teaser_banner">
                     {% if request.user.is_staff %}<p onclick="AjaxUserBlockUnblock()">{% if user.is_active %}BLOCK{% else %}UNBLOCK{% endif %}</p>{% endif %}
                     <div class="story-teaser_image">
-                        <img src="https://pp.userapi.com/c840528/v840528370/398ff/roakpMjUfoo.jpg" style="width:47%;height:246px">
+{#                        <img src="" style="width:47%;height:246px">#}
                     </div>
                     <div class="story-details story-teaser_text">
                         <h3 class="heading-standard"><a href="{% url 'user_profile' username=user %}">{{ user }}{% if user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
