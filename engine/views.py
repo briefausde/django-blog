@@ -7,6 +7,7 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.template.context_processors import csrf
 from django.shortcuts import get_object_or_404, redirect
@@ -31,6 +32,11 @@ from .models import Post, Log, Category, Comment, Index
 # from django.core.cache import cache
 # cache.clear()
 # @cache_page(120, key_prefix="main")
+
+
+def login(request, *args, **kwargs):
+    # print("say hi")
+    return LoginView.as_view(template_name='registration/_login.html', **kwargs)(request, *args, **kwargs)
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
@@ -150,10 +156,12 @@ def remove_comment(request):
     return redirect('/')
 
 
+# delete this
 def register():
     return reverse("accounts:register_done")
 
 
+# change this
 class RegisterDoneView(LogMixin, generic.TemplateView):
     template_name = "registration/_register_done.html"
 

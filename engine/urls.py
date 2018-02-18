@@ -18,7 +18,7 @@ sitemaps = {
 # разобраться с шаблонами и подтверждением
 # добавить логи, сдлать в register get_success_url=reverse_lazy("accounts:register_done")
 accounts_urlpatterns = [
-    url(r'^login/$', LoginView.as_view(template_name="registration/_login.html"), name='login'),
+    url(r'^login/$', views.login, name='login'),
     url(r'^logout/$', LogoutView.as_view(template_name="registration/_logged_out.html"), name='logout'),
     url(r'^password_change/$', PasswordChangeView.as_view(success_url=reverse_lazy('accounts:password_change_done'), template_name="registration/_password_change_form.html"), name='password_change'),
     url(r'^password_change/done/$', PasswordChangeDoneView.as_view(template_name="registration/_password_change_done.html"), name='password_change_done'),

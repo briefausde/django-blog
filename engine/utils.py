@@ -5,7 +5,7 @@ from django.core.paginator import Paginator, EmptyPage
 
 
 @staff_member_required
-def reload():
+def reload(request):
     Index.delete(Index)
     Index.create(Index)
     return redirect('main')
