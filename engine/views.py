@@ -137,8 +137,7 @@ class CommentsListView(generic.ListView):
 @login_required(login_url='/accounts/login/')
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    text = request.POST.get('text', '')
-    text = text.strip()
+    text = request.POST.get('text', '').strip()
     if text != '':
         comment = Comment.objects.create(author=request.user, text=text, post=post, created_date=timezone.now())
         comment.save()
@@ -186,7 +185,6 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
 class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        # if (true) and (true(not true))
         if (self.request.user != post.author) and not self.request.user.is_superuser:
             return redirect('post_detail', name=post.url)
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
@@ -266,5 +264,4 @@ class SearchListView(LogMixin, generic.ListView):
                 context['query'] = word
             else:
                 context['text'] = "Nothing find"
-
         return context
