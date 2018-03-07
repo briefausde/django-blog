@@ -24,7 +24,7 @@ class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
     published_date = models.DateTimeField(blank=True, null=True)
-    views = models.IntegerField(default=0)
+    views = models.IntegerField(default=0, editable=False)
     url = models.CharField(max_length=300, blank=True)
     comments_mode = models.BooleanField(default=True)
 
