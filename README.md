@@ -1,2 +1,2 @@
 # djs
-Simple django news web site with jquery elements. 
+Simple django news website with jquery elements. 
