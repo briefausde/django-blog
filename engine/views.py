@@ -250,5 +250,5 @@ class SearchListView(LogMixin, generic.ListView):
                 context['posts'] = paginator(posts, self.request.GET.get('pk', 1), 15)
                 context['query'] = word
             else:
-                context['text'] = "Nothing find"
+                context['text'] = "Nothing found"
         return context
