@@ -40,13 +40,15 @@ class Post(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         import time
         self.published_date = timezone.now()
-        if len(self.url) > 1:
-            if Post.objects.filter(url=self.url_refactoring(self.url)).exclude(pk=self.pk).order_by('url'):
-                self.url = self.url_refactoring(self.url) + "-" + str(round(time.time()))
-            else:
-                self.url = self.url_refactoring(self.url)
-        else:
+
+        if not self.url:
             self.url = self.url_refactoring(self.name)
+
+        self.url = self.url_refactoring(self.url)
+
+        if Post.objects.filter(url=self.url).exclude(pk=self.pk).order_by('url'):
+            self.url += "-" + str(round(time.time()))
+
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
         Index.add(Index, self.pk)
 
@@ -111,7 +113,7 @@ class Index(models.Model):
         Index.objects.filter(pk=self.pk).update(index=','.join(str(i) for i in self.index))
 
     def getindex(self):
-        return set(int(i) for i in self.index.split(','))
+        return set(int(i.replace("{", "").replace("}", "")) for i in self.index.split(','))
 
     def create(self):
         last_pk = Post.objects.order_by('-pk')[0].pk
@@ -153,18 +155,17 @@ class Index(models.Model):
     def find(self, search_request):
         search_words = split_str(search_request)
         posts = []
-        try:
-            for key in search_words:
-                posts.append(get_object_or_404(self, word=key).getindex())
-            print(posts)
-            rez = posts[0]
-            for i in range(len(posts) - 1):
-                rez = set(posts[i]) & set(posts[i + 1])
-            posts = []
-            for i in rez:
-                posts.append(Post.objects.get(pk=i))
-        except:
-            None
+        # try:  # never enter
+        for key in search_words:
+            posts.append(Index.objects.get(word=key).getindex())  # posts always empty, get return error
+        rez = posts[0]
+        for i in range(len(posts) - 1):
+            rez = set(posts[i]) & set(posts[i + 1])
+        posts = []
+        for i in rez:
+            posts.append(Post.objects.get(pk=i))
+        # except:
+        #     None
         return posts
 
 
