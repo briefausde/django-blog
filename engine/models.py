@@ -113,7 +113,7 @@ class Index(models.Model):
         Index.objects.filter(pk=self.pk).update(index=','.join(str(i) for i in self.index))
 
     def getindex(self):
-        return set(int(i.replace("{", "").replace("}", "")) for i in self.index.split(','))
+        return set(int(i.replace("{", "").replace("}", "")) for i in self.index.split(','))  # change this
 
     def create(self):
         last_pk = Post.objects.order_by('-pk')[0].pk
@@ -155,17 +155,17 @@ class Index(models.Model):
     def find(self, search_request):
         search_words = split_str(search_request)
         posts = []
-        # try:  # never enter
-        for key in search_words:
-            posts.append(Index.objects.get(word=key).getindex())  # posts always empty, get return error
-        rez = posts[0]
-        for i in range(len(posts) - 1):
-            rez = set(posts[i]) & set(posts[i + 1])
-        posts = []
-        for i in rez:
-            posts.append(Post.objects.get(pk=i))
-        # except:
-        #     None
+        try:  # never enter
+            for key in search_words:
+                posts.append(Index.objects.get(word=key).getindex())  # posts always empty, get return error
+            rez = posts[0]
+            for i in range(len(posts) - 1):
+                rez = set(posts[i]) & set(posts[i + 1])
+            posts = []
+            for i in rez:
+                posts.append(Post.objects.get(pk=i))
+        except Exception as e:
+            print(e)
         return posts
 
 
