@@ -31,9 +31,8 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post_detail', args=(self.url,))
 
-    def publish(self):
-        self.published_date = timezone.now()
-        self.save()
+    def update_views(self):
+        Post.objects.filter(pk=self.pk).update(views=self.views+1)
 
     def url_refactoring(self, url):
         return str.lower(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', url.replace("-", " ")).replace(" ", "-"))
@@ -49,7 +48,7 @@ class Post(models.Model):
         else:
             self.url = self.url_refactoring(self.name)
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        # add_index(self.pk)
+        Index.add(Index, self.pk)
 
     def __str__(self):
         return self.name
@@ -145,6 +144,7 @@ class Index(models.Model):
                 except:
                     indexes.add(pk)
                     self.objects.create(word=word, index=indexes)
+                print("Add index {0} to {1}".format(word, pk))
 
     def delete(self):
         self.objects.all().delete()
@@ -156,6 +156,7 @@ class Index(models.Model):
         try:
             for key in search_words:
                 posts.append(get_object_or_404(self, word=key).getindex())
+            print(posts)
             rez = posts[0]
             for i in range(len(posts) - 1):
                 rez = set(posts[i]) & set(posts[i + 1])

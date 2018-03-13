@@ -219,8 +219,7 @@ class PostDetailsView(LogMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         post = self.get_object()
-        post.views += 1
-        post.save()
+        post.update_views()
         context = super(PostDetailsView, self).get_context_data()
         from math import floor
         time = floor(len(post.text_big) * 0.075 / 60)
