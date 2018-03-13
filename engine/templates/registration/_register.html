@@ -8,23 +8,18 @@
                 {% csrf_token %}
                 {% for field in form %}
                     <p>
-                        {{ field.label_tag }}<br>
+                        {{ field.label_tag }}
                         {{ field }}
-                        {% if field.help_text %}
-                            <small style="color: grey">{{ field.help_text }}</small>
-                        {% endif %}
                         {% for error in field.errors %}
                             <p style="color: red">{{ error }}</p>
                         {% endfor %}
                     </p>
                 {% endfor %}
-                <button type="submit">Sign up</button>
+                <br>
+                <input type="submit" value="SIGN UP" />
             </form>
         </div>
-
-        <p><a href="{% url 'accounts:login' %}">Sign in</a></p>
-
-        {% if message == 1 %}<br><br><center>message 1</center><br><br>{% endif %}
-        {% if message == 2 %}<br><br><center>message 2</center><br><br>{% endif %}
+        <br><br>
+        <p>Already have an account? Then please <a href="{% url 'accounts:login' %}">SIGN IN.</a></p>
     </div>
 {% endblock %}

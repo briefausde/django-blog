@@ -435,7 +435,7 @@ p.para {
 .table-form{
 	margin: 0em auto;
 }
-.table-form form input[type="text"]{
+.table-form form input{
 	font-family: 'Open Sans', sans-serif;
 	border: 1px solid rgba(192, 192, 192, 0.61);
 	outline: none;
@@ -483,7 +483,7 @@ p.para {
 	-moz-box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.05);
 	-o-box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.05);
 }
-.table-form form input[type="text"]:hover,.table-form textarea:hover{
+.table-form form input:hover,.table-form textarea:hover{
 	border: 1px solid #B9CB41;
 }
 .table-form input[type="submit"]{

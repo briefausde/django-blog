@@ -2,42 +2,45 @@
 
 {% block content %}
 <div id="main" role="main">
-<div class="table-form">
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+    <div class="table-form">
+        {% if form.errors %}
+            <p>Your username and password didn't match. Please try again.</p>
+        {% endif %}
 
-{% if next %}
-    {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-    {% else %}
-    <p>Please login to see this page.</p>
-    {% endif %}
-{% endif %}
+        {% if next %}
+            {% if user.is_authenticated %}
+                <p>Your account doesn't have access to this page. To proceed,
+                    please login with an account that has access.</p>
+            {% else %}
+                <p>Please login to see this page.</p>
+            {% endif %}
+        {% endif %}
 
+        <form method="post" action="{% url 'accounts:login' %}" class="auth-form">
+            {% csrf_token %}
 
-<form method="post" action="{% url 'accounts:login' %}" class="auth-form">
-{% csrf_token %}
+            <div>
+                <td>{{ form.username.label_tag }}</td>
+                <td>{{ form.username.errors}}</td>
+                <input id="id_username" class="form-control" maxlength="254" name="username" type="text" />
+            </div>
 
-<div>
-  <td>{{ form.username.label_tag }}</td>
-  <td>{{ form.username }}</td>
+            <div>
+                <td>{{ form.password.label_tag }}</td>
+                <td>{{ form.password.errors }}</td>
+                <input id="id_password" class="form-control" name="password" type="password" />
+            </div>
+
+            <div>
+                <input type="submit" value="SIGN IN" />
+                <input type="hidden" name="next" value="{{ next }}" />
+            </div>
+        </form>
+
+        <br>
+        <p><a href="{% url 'accounts:register' %}">Sign up</a></p>
+        <p><a href="{% url 'accounts:password_reset' %}">Forgot password?</a></p>
+
+    </div>
 </div>
-<div>
-  <td>{{ form.password.label_tag }}</td>
-  <td>{{ form.password }}</td>
-</div>
-
-<div>
-  <input type="submit" value="login" />
-  <input type="hidden" name="next" value="{{ next }}" />
-</div>
-</form>
-
-<p><a href="{% url 'accounts:register' %}">Sign up</a></p>
-{# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'accounts:password_reset' %}">Lost password?</a></p>
-
-</div></div>
 {% endblock %}
