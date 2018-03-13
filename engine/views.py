@@ -20,7 +20,7 @@ from .models import Post, Log, Category, Comment, Index
 # add_coment, remove_comment поменять на view
 # Js (jQuery), databases, book, Django REST
 
-# выключить debug
+# выключить debug.
 # cache
 # from django.views.decorators.cache import cache_page
 # from django.core.cache import cache

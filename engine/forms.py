@@ -8,7 +8,7 @@ class PostForm(forms.ModelForm):
         fields = ('name', 'text_small', 'text_big', 'img_small', 'img_big', 'tags', 'category', 'url', 'comments_mode',)
 
 
-# example of form style
+# example of form style.
 # from django.contrib.auth.models import User
 # from django.forms import Textarea, PasswordInput, TextInput
 # class AuthForm(forms.ModelForm):
