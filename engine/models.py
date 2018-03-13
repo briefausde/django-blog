@@ -155,9 +155,9 @@ class Index(models.Model):
     def find(self, search_request):
         search_words = split_str(search_request)
         posts = []
-        try:  # never enter
+        try:
             for key in search_words:
-                posts.append(Index.objects.get(word=key).getindex())  # posts always empty, get return error
+                posts.append(Index.objects.get(word=key).getindex())
             rez = posts[0]
             for i in range(len(posts) - 1):
                 rez = set(posts[i]) & set(posts[i + 1])
