@@ -32,7 +32,7 @@ body{
 }
 /*---start-header----*/
 .header{
-	background:url(../images/border.png) repeat-x 0px 0px #FFF;
+	background:url(../media/border.png) repeat-x 0px 0px #FFF;
 	padding: 1.5em 0 1.2em;
 	border-bottom: 1px solid rgba(214, 213, 212, 0.64);
 	position: fixed;
@@ -55,7 +55,7 @@ body{
 	width:48px;
 	height:34px;
 	display:block;
-	background:url(../images/nav-icon.png) no-repeat 0px 0px;
+	background:url(../media/nav-icon.png) no-repeat 0px 0px;
 }
 .top-searchbar {
 	float: left;
@@ -90,7 +90,7 @@ body{
 }
 .top-searchbar input[type="submit"]{
 	position: absolute;
-	background: url(../images/search-icon.png) no-repeat 0px 0px;
+	background: url(../media/search-icon.png) no-repeat 0px 0px;
 	height: 26px;
 	width: 26px;
 	display: inline-block;
@@ -155,10 +155,10 @@ a.boxclose{
 	width:35px;
 	height:35px;
 	display:inline-block;
-	background:url(../images/close2.png) no-repeat 0px 0px;
+	background:url(../media/close2.png) no-repeat 0px 0px;
 }
 .boxclose span:hover{
-	background:url(../images/close2h.png) no-repeat 0px 0px;
+	background:url(../media/close2h.png) no-repeat 0px 0px;
 }
 /*--userinfo--*/
 .userinfo{
@@ -195,7 +195,7 @@ a.boxclose{
 /*--//userinfo--*/
 /*----start-post-grids----*/
 .post-share span{
-	background:url(../images/facebook.png) no-repeat 0px 0px;
+	background:url(../media/facebook.png) no-repeat 0px 0px;
 	height:26px;
 	width:26px;
 	display:inline-block;
@@ -205,16 +205,16 @@ a.boxclose{
 	-o-border-radius:30em;
 }
 .post-share span:hover{
-	background:url(../images/facebookh.png) no-repeat 0px 0px;
+	background:url(../media/facebookh.png) no-repeat 0px 0px;
 }
 .rateit span{
 	height:18px;
 	width:76px;
-	background:url(../images/start-rate.png) no-repeat 0px 0px; 
+	background:url(../media/start-rate.png) no-repeat 0px 0px;
 	display:inline-block;
 }
 .rateit span:hover{
-	background:url(../images/start-rateh.png) no-repeat 0px 0px; 
+	background:url(../media/start-rateh.png) no-repeat 0px 0px;
 }
 .post-basic-info{
 	padding: 7% 7% 5% 7%;
@@ -240,7 +240,7 @@ a.boxclose{
 	height:12px;
 	width:12px;
 	display:inline-block;
-	background:url(../images/map-pin.png) no-repeat 0px 0px;
+	background:url(../media/map-pin.png) no-repeat 0px 0px;
 	margin-right: 0.4em;
 	transition:0.5s all;
 	-webkit-transition:0.5s all;
@@ -418,7 +418,7 @@ p.para {
 	font-weight: 400;
 }
 .btn1:before{
-	content:url('../images/reply.png');
+	content:url('../media/reply.png');
 	float:left;
 }
 .btn1:hover{
@@ -435,7 +435,7 @@ p.para {
 .table-form{
 	margin: 0em auto;
 }
-.table-form form input{
+.table-form form input[type="text"], .table-form form input[type="password"]{
 	font-family: 'Open Sans', sans-serif;
 	border: 1px solid rgba(192, 192, 192, 0.61);
 	outline: none;
@@ -483,7 +483,7 @@ p.para {
 	-moz-box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.05);
 	-o-box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.05);
 }
-.table-form form input:hover,.table-form textarea:hover{
+.table-form form input[type="text"]:hover, .table-form form input[type="password"]:hover, .table-form textarea:hover{
 	border: 1px solid #B9CB41;
 }
 .table-form input[type="submit"]{

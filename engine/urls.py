@@ -56,7 +56,6 @@ accounts_urlpatterns = [
 urlpatterns = [
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     url(r'^$', views.PostsListView.as_view(), name='main'),
-    # url(r'^view/(?P<pk>[0-9]+)/$', views.post_detail, name='post_detail'), - for pk url access
     url(r'^post/new/$', views.PostCreateView.as_view(), name='post_new'),
     url(r'^edit/(?P<pk>[0-9]+)/$', views.PostEditView.as_view(), name='post_edit'),
     url(r'^article/(?P<name>[-\w]+)$', views.PostDetailsView.as_view(), name='post_detail'),

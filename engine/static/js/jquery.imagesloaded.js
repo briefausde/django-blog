@@ -524,7 +524,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 /*!
  * imagesLoaded v3.0.4
- * JavaScript is all like "You images are done yet or what?"
+ * JavaScript is all like "You media are done yet or what?"
  */
 
 ( function( window ) {
@@ -651,7 +651,7 @@ function defineImagesLoaded( EventEmitter, eventie ) {
     var checkedCount = 0;
     var length = this.images.length;
     this.hasAnyBroken = false;
-    // complete if no images
+    // complete if no media
     if ( !length ) {
       this.complete();
       return;
@@ -725,7 +725,7 @@ function defineImagesLoaded( EventEmitter, eventie ) {
   LoadingImage.prototype = new EventEmitter();
 
   LoadingImage.prototype.check = function() {
-    // first check cached any previous images that have same src
+    // first check cached any previous media that have same src
     var cached = cache[ this.img.src ];
     if ( cached ) {
       this.useCached( cached );
