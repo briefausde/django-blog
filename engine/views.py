@@ -1,19 +1,13 @@
-# from django.utils.decorators import method_decorator
-# from django.http import HttpResponse, Http404
-# from django.contrib.auth import update_session_auth_hash
-# from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate as auth_authenticate
-# from django.contrib.auth.forms import PasswordChangeForm
-# from django.template import TemplateDoesNotExist
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.template.context_processors import csrf
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.views import generic
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from engine.utils import paginator
 from django.views.decorators.http import require_POST
 from .forms import PostForm
@@ -34,9 +28,13 @@ from .models import Post, Log, Category, Comment, Index
 # @cache_page(120, key_prefix="main")
 
 
-def login(request, *args, **kwargs):
-    # print("say hi")
-    return LoginView.as_view(template_name='registration/_login.html', **kwargs)(request, *args, **kwargs)
+class RegisterView(generic.CreateView):
+    model = User
+    form_class = UserCreationForm
+    template_name = "registration/_register.html"
+
+    def get_success_url(self):
+        return reverse_lazy("accounts:register_done")
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
@@ -153,16 +151,6 @@ def remove_comment(request):
     if user == comment.author or user.is_staff:
         comment.delete()
     return redirect('/')
-
-
-# delete this
-def register():
-    return reverse("accounts:register_done")
-
-
-# change this
-class RegisterDoneView(LogMixin, generic.TemplateView):
-    template_name = "registration/_register_done.html"
 
 
 class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):

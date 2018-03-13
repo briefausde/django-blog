@@ -2,9 +2,6 @@ from django.conf.urls import url, include
 from . import views
 from .models import EngineSitemap
 from django.contrib.sitemaps.views import sitemap
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from django.views.generic import CreateView
 from django.contrib.auth.views import *
 from engine.utils import reload
 from django.contrib.flatpages.sitemaps import FlatPageSitemap
@@ -15,22 +12,44 @@ sitemaps = {
     "flatpages": FlatPageSitemap
 }
 
-# разобраться с шаблонами и подтверждением
-# добавить логи, сдлать в register get_success_url=reverse_lazy("accounts:register_done")
 accounts_urlpatterns = [
-    url(r'^login/$', views.login, name='login'),
-    url(r'^logout/$', LogoutView.as_view(template_name="registration/_logged_out.html"), name='logout'),
-    url(r'^password_change/$', PasswordChangeView.as_view(success_url=reverse_lazy('accounts:password_change_done'), template_name="registration/_password_change_form.html"), name='password_change'),
-    url(r'^password_change/done/$', PasswordChangeDoneView.as_view(template_name="registration/_password_change_done.html"), name='password_change_done'),
-    url(r'^password_reset/$', PasswordResetView.as_view(success_url=reverse_lazy('accounts:password_reset_done'), template_name="registration/_password_reset_form.html"), name='password_reset'),
-    url(r'^password_reset/done/$', PasswordResetDoneView.as_view(template_name="registration/_password_reset_done.html"), name='password_reset_done'),
-    url(r'^password_reset/complete/$', PasswordChangeDoneView.as_view(template_name="registration/_password_reset_complete.html"), name='password_reset_complete'),
-    url(r'^password_reset/confirm/$', PasswordResetConfirmView.as_view(success_url=reverse_lazy('accounts:password_reset_complete'), template_name="registration/_password_reset_confirm.html"), name='password_reset_confirm'),
+    url(r'^login/$',
+        LoginView.as_view(template_name="registration/_login.html"),
+        name='login'),
+    url(r'^logout/$',
+        LogoutView.as_view(template_name="registration/_logged_out.html"),
+        name='logout'),
+    url(r'^password_change/$',
+        PasswordChangeView.as_view(success_url=reverse_lazy('accounts:password_change_done'),
+                                   template_name="registration/_password_change_form.html"),
+        name='password_change'),
+    url(r'^password_change/done/$',
+        PasswordChangeDoneView.as_view(template_name="registration/_password_change_done.html"),
+        name='password_change_done'),
+    url(r'^password_reset/$',
+        PasswordResetView.as_view(success_url=reverse_lazy('accounts:password_reset_done'),
+                                  template_name="registration/_password_reset_form.html"),
+        name='password_reset'),
+    url(r'^password_reset/done/$',
+        PasswordResetDoneView.as_view(template_name="registration/_password_reset_done.html"),
+        name='password_reset_done'),
+    url(r'^password_reset/complete/$',
+        PasswordChangeDoneView.as_view(template_name="registration/_password_reset_complete.html"),
+        name='password_reset_complete'),
+    url(r'^password_reset/confirm/$',
+        PasswordResetConfirmView.as_view(success_url=reverse_lazy('accounts:password_reset_complete'),
+                                         template_name="registration/_password_reset_confirm.html"),
+        name='password_reset_confirm'),
     url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        PasswordResetConfirmView.as_view(success_url=reverse_lazy('accounts:password_reset_confirm'), template_name="registration/_password_reset_done.html"), name='password_reset_confirm'),
-    url(r'^register/$', CreateView.as_view(model=User, get_success_url=views.register, form_class=UserCreationForm,
-                                           template_name="registration/_register.html"), name='register'),
-    url(r'^register/done/$', views.RegisterDoneView.as_view(), name='register_done'),
+        PasswordResetConfirmView.as_view(success_url=reverse_lazy('accounts:password_reset_confirm'),
+                                         template_name="registration/_password_reset_done.html"),
+        name='password_reset_confirm'),
+    url(r'^register/$',
+        views.RegisterView.as_view(),
+        name='register'),
+    url(r'^register/done/$',
+        TemplateView.as_view(template_name="registration/_register_done.html"),
+        name='register_done'),
 ]
 
 
