@@ -56,48 +56,27 @@ class Post(models.Model):
         return self.name
 
 
-'''
-from django.contrib.auth.models import AbstractBaseUser
-class MyUser(AbstractBaseUser):
-    email = models.EmailField(
-                        verbose_name='email address',
-                        max_length=255,
-                        unique=True,
-                    )
-    date_of_birth = models.DateField()
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['date_of_birth']
 
-    def get_full_name(self):
-        # The user is identified by their email address
-        return self.email
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    img = models.CharField(max_length=500, default="/static/media/small_default_image.jpg", blank=True)
+    description = models.CharField(max_length=300, default="You can contact with me in mail. My mail you can see in down")
 
-    def get_short_name(self):
-        # The user is identified by their email address
-        return self.email
+    def __str__(self):
+        return self.user.username
 
-    def __unicode__(self):
-        return self.email
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
 
-    def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
-        # Simplest possible answer: Yes, always
-        return True
-
-    def has_module_perms(self, app_label):
-        "Does the user have permissions to view the app `app_label`?"
-        # Simplest possible answer: Yes, always
-        return True
-
-    @property
-    def is_staff(self):
-        "Is the user a member of staff?"
-        # Simplest possible answer: All admins are staff
-        return self.is_admin
-'''
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
 
 
 def split_str(string):

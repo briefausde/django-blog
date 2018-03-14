@@ -10,7 +10,7 @@ from django.urls import reverse, reverse_lazy
 from engine.utils import paginator
 from django.views.decorators.http import require_POST
 from .forms import PostForm, UserForm, RegisterForm
-from .models import Post, Log, Category, Comment, Index
+from .models import Post, Log, Category, Comment, Index, Profile
 
 
 # Js в отдельный файл и убрать из html
@@ -110,9 +110,13 @@ class UserDetailsView(LogMixin, generic.DetailView):
 
 
 class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
-    model = User
+    model = Profile
     form_class = UserForm
     template_name = 'engine/form_edit.html'
+
+    def form_valid(self, form):
+        form.instance.description = form.cleaned_data['description']  # dont working
+        return super(UserEditView, self).form_valid(form)
 
     def get_object(self, queryset=None):
         return User.objects.get(username=self.request.user)
