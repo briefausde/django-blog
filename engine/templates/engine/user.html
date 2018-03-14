@@ -24,10 +24,15 @@
 {#                        <img src="" style="width:47%;height:246px">#}
                     </div>
                     <div class="story-details story-teaser_text">
-                        <h3 class="heading-standard"><a href="{% url 'user_profile' username=user %}">{{ user }}{% if user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
+                        <h3 class="heading-standard"><a href="{% url 'user_detail' username=user %}">{{ user }}{% if user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
                         <em class="story-detail_subtitle">Joined {{ user.date_joined }} | last login {{ user.last_login }}</em>
                         <p>You can contact with me in mail. My mail you can see in down</p>
                         <p>Contact - {{ user.email }}</p>
+                        {% if user == request.user %}
+                            <br><br><br>
+                            <p><a href="{% url 'accounts:password_change' %}">Change password</a></p>
+                            <p><a href="{% url 'user_edit' %}">Change email</a></p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

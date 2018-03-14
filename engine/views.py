@@ -1,5 +1,4 @@
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -10,7 +9,7 @@ from django.views import generic
 from django.urls import reverse, reverse_lazy
 from engine.utils import paginator
 from django.views.decorators.http import require_POST
-from .forms import PostForm
+from .forms import PostForm, UserForm, RegisterForm
 from .models import Post, Log, Category, Comment, Index
 
 
@@ -30,7 +29,7 @@ from .models import Post, Log, Category, Comment, Index
 
 class RegisterView(generic.CreateView):
     model = User
-    form_class = UserCreationForm
+    form_class = RegisterForm
     template_name = "registration/_register.html"
 
     def get_success_url(self):
@@ -110,6 +109,18 @@ class UserDetailsView(LogMixin, generic.DetailView):
         return get_object_or_404(self.model, username=self.kwargs['username'])
 
 
+class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
+    model = User
+    form_class = UserForm
+    template_name = 'engine/form_edit.html'
+
+    def get_object(self, queryset=None):
+        return User.objects.get(username=self.request.user)
+
+    def get_success_url(self):
+        return reverse('user_detail', args=(self.object.username,))
+
+
 @require_POST
 @staff_member_required
 def user_block_unblock(request, username):
@@ -155,7 +166,7 @@ def remove_comment(request):
 
 class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
     form_class = PostForm
-    template_name = 'engine/post_new_edit.html'
+    template_name = 'engine/form_edit.html'
 
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data()
@@ -173,7 +184,7 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
 class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        if (self.request.user != post.author) and not self.request.user.is_superuser:
+        if (self.request.user != post.author) and not self.request.user.is_staff:
             return redirect('post_detail', name=post.url)
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
@@ -181,7 +192,7 @@ class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
 class PostEditView(AuthorOrStaffRequiredMixin, LogMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'engine/post_new_edit.html'
+    template_name = 'engine/form_edit.html'
 
     def get_success_url(self):
         return reverse('post_detail', args=(self.object.url,))

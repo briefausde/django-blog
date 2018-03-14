@@ -17,9 +17,10 @@
                 {% endfor %}
                 <br>
                 <input type="submit" value="SIGN UP" />
+                <br>
+                <p>Already have an account? Then please <a href="{% url 'accounts:login' %}">SIGN IN.</a></p>
+                <br><br><br>
             </form>
         </div>
-        <br><br>
-        <p>Already have an account? Then please <a href="{% url 'accounts:login' %}">SIGN IN.</a></p>
     </div>
 {% endblock %}

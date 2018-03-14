@@ -12,35 +12,34 @@
                 <p>Your account doesn't have access to this page. To proceed,
                     please login with an account that has access.</p>
             {% else %}
-                <p>Sign in, please.</p>
-            {% endif %}
+                <p>Sign in, please</p>
+                <form method="post" action="{% url 'accounts:login' %}" class="auth-form">
+                    {% csrf_token %}
+
+                    <div>
+                        <td>{{ form.username.label_tag }}</td>
+                        <td>{{ form.username.errors}}</td>
+                        <input id="id_username" class="form-control" maxlength="254" name="username" type="text" />
+                    </div>
+
+                    <div>
+                        <td>{{ form.password.label_tag }}</td>
+                        <td>{{ form.password.errors }}</td>
+                        <input id="id_password" class="form-control" name="password" type="password" />
+                    </div>
+
+                    <div>
+                        <input type="submit" value="SIGN IN" />
+                        <input type="hidden" name="next" value="{{ next }}" />
+                    </div>
+                </form>
+
+                <br>
+                <p><a href="{% url 'accounts:register' %}">Sign up</a></p>
+                <p><a href="{% url 'accounts:password_reset' %}">Forgot password?</a></p>
+
+                {% endif %}
         {% endif %}
-
-        <form method="post" action="{% url 'accounts:login' %}" class="auth-form">
-            {% csrf_token %}
-
-            <div>
-                <td>{{ form.username.label_tag }}</td>
-                <td>{{ form.username.errors}}</td>
-                <input id="id_username" class="form-control" maxlength="254" name="username" type="text" />
-            </div>
-
-            <div>
-                <td>{{ form.password.label_tag }}</td>
-                <td>{{ form.password.errors }}</td>
-                <input id="id_password" class="form-control" name="password" type="password" />
-            </div>
-
-            <div>
-                <input type="submit" value="SIGN IN" />
-                <input type="hidden" name="next" value="{{ next }}" />
-            </div>
-        </form>
-
-        <br>
-        <p><a href="{% url 'accounts:register' %}">Sign up</a></p>
-        <p><a href="{% url 'accounts:password_reset' %}">Forgot password?</a></p>
-
     </div>
 </div>
 {% endblock %}
