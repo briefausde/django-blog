@@ -9,7 +9,7 @@ from django.views import generic
 from django.urls import reverse, reverse_lazy
 from engine.utils import paginator
 from django.views.decorators.http import require_POST
-from .forms import PostForm, UserForm, RegisterForm
+from .forms import PostForm, ProfileForm, RegisterForm, EmailForm
 from .models import Post, Log, Category, Comment, Index, Profile
 
 
@@ -111,15 +111,23 @@ class UserDetailsView(LogMixin, generic.DetailView):
 
 class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = Profile
-    form_class = UserForm
+    form_class = ProfileForm
     template_name = 'engine/form_edit.html'
 
-    def form_valid(self, form):
-        form.instance.description = form.cleaned_data['description']  # dont working
-        return super(UserEditView, self).form_valid(form)
+    def get_object(self, queryset=None):
+        return self.model.objects.get(user__username=self.request.user)
+
+    def get_success_url(self):
+        return reverse('user_detail', args=(self.object.user.username,))
+
+
+class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
+    model = User
+    form_class = EmailForm
+    template_name = 'engine/form_edit.html'
 
     def get_object(self, queryset=None):
-        return User.objects.get(username=self.request.user)
+        return self.model.objects.get(username=self.request.user)
 
     def get_success_url(self):
         return reverse('user_detail', args=(self.object.username,))
@@ -135,6 +143,7 @@ def user_block_unblock(request, username):
         else:
             user.is_active = True
         user.save()
+        return redirect('/')
 
 
 class CommentsListView(generic.ListView):
@@ -146,6 +155,7 @@ class CommentsListView(generic.ListView):
         return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
+# AddCommentView must be a CreateView for post querys
 @require_POST
 @login_required(login_url='/accounts/login/')
 def add_comment(request, post_id):

@@ -64,7 +64,7 @@ from django.contrib.auth.models import User
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     img = models.CharField(max_length=500, default="/static/media/small_default_image.jpg", blank=True)
-    description = models.CharField(max_length=300, default="You can contact with me in mail. My mail you can see in down")
+    description = models.CharField(max_length=100, default="You can contact with me in mail. My mail you can see in down")
 
     def __str__(self):
         return self.user.username

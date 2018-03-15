@@ -10,10 +10,16 @@ class PostForm(forms.ModelForm):
         fields = ('name', 'text_small', 'text_big', 'img_small', 'img_big', 'tags', 'category', 'url', 'comments_mode',)
 
 
-class UserForm(forms.ModelForm):
+class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ('description', 'img',)
+
+
+class EmailForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('email',)
 
 
 class RegisterForm(UserCreationForm):

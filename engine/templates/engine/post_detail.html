@@ -67,7 +67,6 @@
         }
         function getAjax() {
             var textComment = $('#form-comment').serialize();
-            console.log(textComment)
             $.ajax({
                 url: "{% url 'add_comment' post.pk %}",
                 type: 'POST',

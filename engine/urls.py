@@ -65,6 +65,7 @@ urlpatterns = [
     url(r'^search/(?P<pk>[0-9]+)/$', views.SearchListView.as_view(), name='find_word_pages'),
     url(r'^user/(?P<username>[-\w]+)$', views.UserDetailsView.as_view(), name='user_detail'),
     url(r'^user/edit/$', views.UserEditView.as_view(), name='user_edit'),
+    url(r'^user/email/edit/$', views.UserChangeEmailView.as_view(), name='user_change_email'),
     url(r'^logs/$', views.LogsView.as_view(), name='logs_view'),
     url(r'^logs_list/$', views.LogsListView.as_view(), name='logs_list'),
     url(r'^logs/(?P<pk>[0-9]+)/$', views.LogDetailsView.as_view(), name='logs_detail'),
