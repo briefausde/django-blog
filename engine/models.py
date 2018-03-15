@@ -125,7 +125,6 @@ class Index(models.Model):
                 except:
                     indexes.add(pk)
                     self.objects.create(word=word, index=indexes)
-                print("Add index {0} to {1}".format(word, pk))
 
     def delete(self):
         self.objects.all().delete()
@@ -134,17 +133,21 @@ class Index(models.Model):
     def find(self, search_request):
         search_words = split_str(search_request)
         posts = []
-        try:
-            for key in search_words:
-                posts.append(Index.objects.get(word=key).getindex())
-            rez = posts[0]
-            for i in range(len(posts) - 1):
-                rez = set(posts[i]) & set(posts[i + 1])
-            posts = []
-            for i in rez:
-                posts.append(Post.objects.get(pk=i))
-        except Exception as e:
-            print(e)
+        pk_list = []
+
+        for key in search_words:
+            try:
+                pk_list.append(get_object_or_404(Index, word=key).getindex())
+            except:
+                pass
+
+        if pk_list:
+            intersection_pk = pk_list[0]
+            for i in range(len(pk_list) - 1):
+                intersection_pk = set(pk_list[i]) & set(pk_list[i + 1])
+            for pk in intersection_pk:
+                posts.append(Post.objects.get(pk=pk))
+
         return posts
 
 
