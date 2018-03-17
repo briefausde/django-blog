@@ -1,7 +1,7 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.template.context_processors import csrf
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
@@ -27,13 +27,7 @@ from .models import Post, Log, Category, Comment, Index, Profile
 # @cache_page(120, key_prefix="main")
 
 
-class RegisterView(generic.CreateView):
-    model = User
-    form_class = RegisterForm
-    template_name = "registration/_register.html"
-
-    def get_success_url(self):
-        return reverse_lazy("accounts:register_done")
+# Mixin view
 
 
 class StaffRequiredMixin(LoginRequiredMixin):
@@ -43,6 +37,21 @@ class StaffRequiredMixin(LoginRequiredMixin):
         if not request.user.is_staff:
             return self.handle_no_permission()
         return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
+# Register view
+
+
+class RegisterView(generic.CreateView):
+    model = User
+    form_class = RegisterForm
+    template_name = "registration/_register.html"
+
+    def get_success_url(self):
+        return reverse_lazy("accounts:register_done")
+
+
+# Logs views
 
 
 class LogMixin(object):
@@ -100,6 +109,9 @@ class LogDetailsView(StaffRequiredMixin, generic.DetailView):
         return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
 
+# Users views
+
+
 class UserDetailsView(LogMixin, generic.DetailView):
     model = User
     context_object_name = 'user'
@@ -133,9 +145,10 @@ class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
         return reverse('user_detail', args=(self.object.username,))
 
 
+# must be an UpdateView
 @require_POST
 @staff_member_required
-def user_block_unblock(request, username):
+def UserBlockUnBlockView(request, username):
     user = get_object_or_404(User, username=username)
     if not user.is_staff:
         if user.is_active:
@@ -144,6 +157,9 @@ def user_block_unblock(request, username):
             user.is_active = True
         user.save()
         return redirect('/')
+
+
+# Comments views
 
 
 class CommentsListView(generic.ListView):
@@ -155,29 +171,30 @@ class CommentsListView(generic.ListView):
         return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
-class AddCommentView(LoginRequiredMixin, LogMixin, generic.CreateView):
+class CommentAddView(LoginRequiredMixin, LogMixin, generic.CreateView):
     model = Comment
     fields = ['text']
     template_name = "engine/comments.html"
+    success_url = '/'
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         form.instance.post = get_object_or_404(Post, pk=self.kwargs['post_id'])
-        return super(AddCommentView, self).form_valid(form)
-
-    def get_success_url(self):
-        return '/'
+        return super(CommentAddView, self).form_valid(form)
 
 
-@require_POST
-@login_required(login_url='/accounts/login/')
-def remove_comment(request):
-    comment_id = int(request.POST.get("id"))
-    user = request.user
-    comment = get_object_or_404(Comment, pk=comment_id)
-    if user == comment.author or user.is_staff:
-        comment.delete()
-    return redirect('/')
+class CommentDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
+    model = Comment
+    success_url = '/'
+
+    def get_object(self, queryset=None):
+        comment = get_object_or_404(Comment, pk=self.request.POST.get("id"))
+        if not comment.author == self.request.user and not self.request.user.is_staff:
+            raise Http404
+        return comment
+
+
+# Posts views
 
 
 class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
@@ -194,18 +211,16 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
         return super(PostCreateView, self).form_valid(form)
 
 
-class AuthorOrStaffRequiredMixin(LoginRequiredMixin):
-    def dispatch(self, request, *args, **kwargs):
-        post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        if (self.request.user != post.author) and not self.request.user.is_staff:
-            return redirect('post_detail', name=post.url)
-        return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
-
-
-class PostEditView(AuthorOrStaffRequiredMixin, LogMixin, generic.UpdateView):
+class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'engine/form_edit.html'
+
+    def get_object(self, queryset=None):
+        post = super(PostEditView, self).get_object()
+        if not post.author == self.request.user and not self.request.user.is_staff:
+            raise Http404
+        return post
 
     def get_success_url(self):
         return reverse('post_detail', args=(self.object.url,))
@@ -253,6 +268,9 @@ class PostDetailsView(LogMixin, generic.DetailView):
 
     def get_object(self):
         return Post.objects.filter(url=Post.url_refactoring(Post, self.kwargs['name'])).first()
+
+
+# Search view
 
 
 class SearchListView(LogMixin, generic.ListView):
