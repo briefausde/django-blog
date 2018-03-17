@@ -1,10 +1,8 @@
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.template.context_processors import csrf
-from django.shortcuts import get_object_or_404, redirect
-from django.utils import timezone
+from django.shortcuts import redirect
 from django.views import generic
 from django.urls import reverse, reverse_lazy
 from engine.utils import paginator
@@ -143,20 +141,6 @@ class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 
     def get_success_url(self):
         return reverse('user_detail', args=(self.object.username,))
-
-
-# must be an UpdateView
-@require_POST
-@staff_member_required
-def UserBlockUnBlockView(request, username):
-    user = get_object_or_404(User, username=username)
-    if not user.is_staff:
-        if user.is_active:
-            user.is_active = False
-        else:
-            user.is_active = True
-        user.save()
-        return redirect('/')
 
 
 # Comments views

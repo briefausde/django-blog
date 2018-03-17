@@ -1,23 +1,6 @@
 {% extends 'engine/base.html' %}
 
 {% block content %}
-{% if request.user.is_staff %}
-<script type="text/javascript">
-	function AjaxUserBlockUnblock(){
-        $.ajax({
-            url: "{% url 'user_block_unblock' user.username %}",
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-            },
-            success: function(){
-                alert("Success block/unblock user")
-            }
-        });
-    }
-</script>
-{% endif %}
-
     <div id="main" role="main">
         <div class="row">
             <div class="feature-box">
@@ -38,7 +21,6 @@
                             <p><a href="{% url 'user_edit' %}">Change description or avatar</a></p>
                             <p><a href="{% url 'user_change_email' %}">Change email</a></p>
                         {% endif %}
-                        {% if request.user.is_staff %}<p onclick="AjaxUserBlockUnblock()">{% if user.is_active %}<br><br>BLOCK USER{% else %}<br><br>UNBLOCK USER{% endif %}</p>{% endif %}
                     </div>
                 </div>
             </div>
