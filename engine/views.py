@@ -9,7 +9,7 @@ from django.views import generic
 from django.urls import reverse, reverse_lazy
 from engine.utils import paginator
 from django.views.decorators.http import require_POST
-from .forms import PostForm, ProfileForm, RegisterForm, EmailForm
+from .forms import *
 from .models import Post, Log, Category, Comment, Index, Profile
 
 
@@ -111,7 +111,7 @@ class UserDetailsView(LogMixin, generic.DetailView):
 
 class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = Profile
-    form_class = ProfileForm
+    fields = ['description', 'img']
     template_name = 'engine/form_edit.html'
 
     def get_object(self, queryset=None):
@@ -123,7 +123,7 @@ class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 
 class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = User
-    form_class = EmailForm
+    fields = ['email']
     template_name = 'engine/form_edit.html'
 
     def get_object(self, queryset=None):
@@ -155,16 +155,18 @@ class CommentsListView(generic.ListView):
         return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
 
 
-# AddCommentView must be a CreateView for post querys
-@require_POST
-@login_required(login_url='/accounts/login/')
-def add_comment(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
-    text = request.POST.get('text', '').strip()
-    if text != '':
-        comment = Comment.objects.create(author=request.user, text=text, post=post, created_date=timezone.now())
-        comment.save()
-    return redirect('/')
+class AddCommentView(LoginRequiredMixin, LogMixin, generic.CreateView):
+    model = Comment
+    fields = ['text']
+    template_name = "engine/comments.html"
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = get_object_or_404(Post, pk=self.kwargs['post_id'])
+        return super(AddCommentView, self).form_valid(form)
+
+    def get_success_url(self):
+        return '/'
 
 
 @require_POST
@@ -188,11 +190,8 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
         return context
 
     def form_valid(self, form):
-        if self.request.user:
-            form.instance.author = self.request.user
-            return super(PostCreateView, self).form_valid(form)
-        else:
-            return redirect('main')
+        form.instance.author = self.request.user
+        return super(PostCreateView, self).form_valid(form)
 
 
 class AuthorOrStaffRequiredMixin(LoginRequiredMixin):

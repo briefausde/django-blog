@@ -27,7 +27,7 @@
            			<div class="artical-commentbox">
 	               		<div class="table-form">
 							{% if post.comments_mode %}
-	                   		<form id="form-comment" method="POST" name="post_comment" onsubmit="getAjax()" action="javascript:void(null);">{% csrf_token %}
+	                   		<form id="form-comment" method="POST" name="post_comment" onsubmit="AjaxAddComment()" action="javascript:void(null);">{% csrf_token %}
                                    <textarea id="id_text" class="form-control" placeholder="Input your comment and press ENTER" name="text" style="width:87%;height:50px"></textarea>
 	                   		</form>
 							{% endif %}
@@ -35,7 +35,7 @@
 	               		<div class="clear"> </div>
 	           		</div>
 	           		{% else %}
-	           		<br><a href="{% url 'accounts:login' %}?next=/article/{{ post.url }}">For add comment log-in, please</a><br><br>
+	           		<br><a href="{% url 'accounts:login' %}?next=/article/{{ post.url }}">Please login to add a comment</a><br><br>
 	           		{% endif %}
 					<div id="comments"></div>
 	       		</div>
@@ -65,7 +65,7 @@
                 }
             });
         }
-        function getAjax() {
+        function AjaxAddComment() {
             var textComment = $('#form-comment').serialize();
             $.ajax({
                 url: "{% url 'add_comment' post.pk %}",

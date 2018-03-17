@@ -72,8 +72,8 @@ urlpatterns = [
     url(r'^reload/$', reload, name='reload'),
     url(r'^accounts/', include(accounts_urlpatterns, namespace='accounts')),
     url(r'^comments/(?P<post_id>[\d+]*)$', views.CommentsListView.as_view(), name='comments'),
-    url(r'^add_comment/(?P<post_id>[\d+]*)$', views.add_comment, name='add_comment'),
-    url(r'^remove_comment/$', views.remove_comment, name='remove_comment'),
+    url(r'^comments/add/(?P<post_id>[\d+]*)$', views.AddCommentView.as_view(), name='add_comment'),
+    url(r'^comments/remove/$', views.remove_comment, name='remove_comment'),
     url(r'^user_block_unblock/(?P<username>[-\w]+)$$', views.user_block_unblock, name='user_block_unblock'),
     url(r'', include('django.contrib.flatpages.urls')),
 ]
