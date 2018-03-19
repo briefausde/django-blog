@@ -1,28 +1,17 @@
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.template.context_processors import csrf
-from django.shortcuts import redirect
 from django.views import generic
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from engine.utils import paginator
-from django.views.decorators.http import require_POST
 from .forms import *
-from .models import Post, Log, Category, Comment, Index, Profile
+from .models import *
 
 
 # Js в отдельный файл и убрать из html
-# Убрать логи
+# Убрать логи, добавить кеширование
 # Python manage.py commands
-# add_coment, remove_comment поменять на view
 # Js (jQuery), databases, book, Django REST
-
-# выключить debug.
-# cache
-# from django.views.decorators.cache import cache_page
-# from django.core.cache import cache
-# cache.clear()
-# @cache_page(120, key_prefix="main")
 
 
 # Mixin view
@@ -245,7 +234,7 @@ class PostDetailsView(LogMixin, generic.DetailView):
         post.update_views()
         context = super(PostDetailsView, self).get_context_data()
         from math import floor
-        time = floor(len(post.text_big) * 0.075 / 60)
+        time = floor(len(post.text_big) * 0.075 / 60) + 1
         context['read_time'] = time
         context['user'] = self.request.user
         return context
