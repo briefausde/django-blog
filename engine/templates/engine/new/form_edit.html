@@ -1,0 +1,14 @@
+{% extends 'engine/new/base.html' %}
+
+{% block content %}
+    <div id="main" role="main">
+        <div class="table-form">
+            <form method="POST" class="post-form">{% csrf_token %}
+                {{ form.as_p }}
+                <br>
+                <input type="submit" value="Submit change">
+                <br><br>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'engine/new/base.html' %}
+
+{% block content %}
+    <div id="main" role="main">
+        <div class="row">
+            <div class="feature-box">
+                <div class="story-teaser_banner">
+                    <div class="story-teaser_image" style="position:relative;style:float:left">
+                        <img src="{{ user.profile.img }}" style="width:40%;height:246px">
+                    </div>
+                    <div class="story-details story-teaser_text" style="position: relative;float:right;margin-top:-175px">
+                        <h3 class="heading-standard"><a href="{% url 'user_detail' username=user %}">{{ user|title }}{% if user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
+                        <em class="story-detail_subtitle">Joined {{ user.date_joined }} | last login {{ user.last_login }}</em>
+                        <div style="width:500px">
+                            <p>{{ user.profile.description|linebreaksbr }}</p>
+                        </div>
+                        <p>Contact - {{ user.email }}</p>
+                        {% if user == request.user %}
+                            <br>
+                            <p><a href="{% url 'accounts:password_change' %}">Change password</a></p>
+                            <p><a href="{% url 'user_edit' %}">Change description or avatar</a></p>
+                            <p><a href="{% url 'user_change_email' %}">Change email</a></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

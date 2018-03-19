@@ -1,0 +1,43 @@
+{% extends query|yesno:"engine/search.html,engine/new/home.html" %}
+
+{% block content_posts %}
+    {% for post in posts %}
+<div class="panel-body col-md-12 col-sm-12 space-4">
+  <a href="{% url 'post_detail' name=post.url %}" class="link-reset">
+    <div class="media">
+      <div class="pull-left">
+        <img height="100" src="{{ post.img_small }}" /><br />
+      </div>
+      <div class="media-body">
+        <div class="space-top-2" style="margin-left: 15px;">
+          <div class="h4 space-1">
+            <strong>{{ post.name|truncatechars:64|title }}</strong>
+
+              <div class="pull-right">
+                <small>
+                <i class="icon icon-star icon-beach"></i>&nbsp;<strong>{{ post.views }}</strong>
+                </small>
+                &nbsp;&nbsp;
+                <small>
+                <i class="icon icon-meal icon-gray"></i>&nbsp;<strong>{{ post.comments_mode }}</strong>
+                </small>
+              </div>
+
+          </div>
+
+          <div class="project-desc">
+            {{ post.text_small|truncatechars:280 }}
+          </div>
+
+
+            <div class="icon-babu space-top-1 space-1">
+              <a href="/category/{{ post.category.name }}/1" class="link-reset">{{ post.category.name }}</a>
+            </div>
+
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% if category %}
+<p class="type-centered homepage-see-more">
+    {% if posts.paginator.num_pages != 1 %}
+    {% if posts.has_previous %}
+    <a href="{% url 'get_from_category_pages' category_name=category pk=posts.previous_page_number %}">previous</a> |
+    {% endif %}
+    page {{ posts.number }} of {% if posts.number != posts.paginator.num_pages %}
+    <a href="{% url 'get_from_category_pages' category_name=category pk=posts.paginator.num_pages %}">{{ posts.paginator.num_pages }}</a>
+    {% else %}{{ posts.paginator.num_pages }} | <a href="{% url 'get_from_category_pages' category_name=category pk=1 %}">first page</a>{% endif %}
+    {% if posts.has_next %}
+    | <a href="{% url 'get_from_category_pages' category_name=category pk=posts.next_page_number %}">next</a>
+    {% endif %}
+    {% endif %}
+</p>
+{% else %}
+<div id="pages" style="position:absolute;margin-top:100px;background:#fff;right:50%">
+    <p><a href="{% url 'get_from_category_pages' category_name='all' pk=2 %}">More posts</a></p>
+    <br><br><br><br><br>
+</div>
+{% endif %}

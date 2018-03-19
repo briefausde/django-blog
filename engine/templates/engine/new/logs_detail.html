@@ -1,0 +1,20 @@
+{% extends 'engine/new/base.html' %}
+
+{% block content %}
+<div id="main" role="main">
+    <ul id="tiles">
+        <p><b>Date:</b> {{ log.date|date:"d/m/Y G:i:s" }}</p>
+        <p><b>User:</b> {{ log.author }}</p>
+        <p><b>IP:</b> {{ log.ip }}</p>
+        <p><b>Method:</b> {{ log.method }}</p>
+        <p><b>Path:</b> {{ log.path }}</p>
+        {% if log.data %}<p><b>Data:</b> {{ log.data }}</p>{% endif %}
+        <br>
+        <p><b>Body:</b> {{ log.body }}</p>
+        <br>
+        <p><b>Cookies:</b> {{ log.cookies }}</p>
+        <br>
+        <p><b>Meta:</b> {{ log.meta }}</p>
+    </ul>
+</div>
+{% endblock %}

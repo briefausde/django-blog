@@ -1,0 +1,91 @@
+{% extends 'engine/new/base.html' %}
+
+{% block content %}
+<div class="page-container-full bg-dark-gray text-contrast text-center">
+
+  <div id="hero-app" style="position:absolute; width:100%; height: 100%;"></div>
+
+  <div class="space-6 space-top-6">
+    <img height="100" src="/img/projects/binaryalert.png"><br>
+    <div class="h1 space-top-4">{{ post.name|truncatechars:64 }}</div>
+    <h4 class="space-top-2">{{ post.name|truncatechars:128 }}</h4>
+    <div>
+
+      <i class="icon icon-star icon-beach"></i>&nbsp;{{ post.views }}
+      &nbsp;&nbsp;
+      <i class="icon icon-meal icon-light-gray"></i>&nbsp;{{ read_time }}
+
+    </div>
+  </div>
+</div>
+
+<div class="page-container space-8 space-top-4">
+  <div class="hide-sm col-md-2 text-center">
+
+    <div class="media-photo media-round space-2">
+       <img src="{{ post.author.profile.img }}" alt="{{ post.author }}" height="67" width="67">
+     </div>
+     <p class="icon-rausch">{{ post.author }}</p>
+
+  </div>
+
+  <div class="col-md-7 col-sm-12 project-content">
+
+<h4><strong>Why does JavaScript need a style guide?</strong></h4>
+
+<p>{{ post.text_big }}</p>
+
+
+    <div class="show-sm text-center">
+
+      <div class="media-photo media-round space-2">
+         <img src="" alt="Harrison Shoff" height="67" width="67">
+       </div>
+       <p class="icon-rausch">Harrison Shoff</p>
+
+    </div>
+
+    <div class="panel panel-light space-4 space-top-6 hide-sm">
+  <div class="panel-body clearfix">
+    <span class="callout-text">
+      <strong>Questions? Comments?</strong> Let's talk on Github.</span>
+    <a href="" class="btn btn-primary pull-right">
+      Start a convo
+    </a>
+  </div>
+</div>
+
+  </div>
+
+  <div class="col-md-3 col-sm-12">
+    <a href="t" class="btn btn-primary btn-block">Github</a>
+
+
+
+      <a href="" class="btn btn-block">
+        ES6+ Style Guide
+      </a>
+
+
+      <a href="" class="btn btn-block">
+        React Style Guide
+      </a>
+
+
+      <a href="" class="btn btn-block">
+        CSS-in-JS Style Guide
+      </a>
+
+
+      <a href="" class="btn btn-block">
+        ES5 Style Guide (Deprecated)
+      </a>
+
+
+      <a href="" class="btn btn-block">
+        Gitter
+      </a>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'engine/new/base.html' %}
+
+{% block content %}
+<div class='row show-sm text-center header'>
+  <a href='/'>
+    <i class='icon icon-airbnb icon-size-2 icon-rausch'></i>
+  </a>
+</div>
+
+    <div class='va-container va-container-h h460 bg-white space-4'>
+  <div class="va-middle text-center">
+    <div><i class='icon icon-host-home-alt icon-size-4'></i></div>
+    <div class='h1 space-4 space-top-4'><strong>Open Source</strong></div>
+  </div>
+</div>
+
+<div class='page-container'>
+  <div class='row space-8'>
+    <div class='col-md-3'>
+      <div class="sidenav">
+  <div class="page-container">
+    <ul class="sidenav-list">
+      <li>
+        <a href="/projects/" class="sidenav-item"
+           >
+          <i class='icon icon-list-ul'></i> All Projects
+        </a>
+      </li>
+      <li>
+        <a href="/projects/data/" class="sidenav-item"
+           >
+          <i class='icon icon-stats'></i> Data
+        </a>
+      </li>
+      <li>
+        <a href="/projects/backend/" class="sidenav-item"
+           >
+          <i class='icon icon-filter'></i> Backend
+        </a>
+      </li>
+      <li>
+        <a href="/projects/frontend/" class="sidenav-item"
+           >
+          <i class='icon icon-code'></i> Frontend
+        </a>
+      </li>
+      <li>
+        <a href="/projects/mobile/" class="sidenav-item"
+           >
+          <i class='icon icon-phone-android'></i> Mobile
+        </a>
+      </li>
+      <li>
+        <a href="/projects/infrastructure/" class="sidenav-item"
+           >
+          <i class='icon icon-cog'></i> Infrastructure
+        </a>
+      </li>
+      <li>
+        <a href="/projects/styleguides/" class="sidenav-item"
+
+           aria-selected="true"
+           >
+          <i class='icon icon-book'></i> Style Guides
+        </a>
+      </li>
+      <li>
+        <a href="/projects/testing/" class="sidenav-item"
+           >
+          <i class='icon icon-thumbs-up'></i> Testing
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+    </div>
+
+    <div class='panel panel__no-border col-md-9'>
+        {% block content_posts %}
+        {% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}
