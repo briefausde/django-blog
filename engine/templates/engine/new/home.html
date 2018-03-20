@@ -79,6 +79,9 @@
     <div class='panel panel__no-border col-md-9'>
         {% block content_posts %}
         {% endblock %}
+        <div class="panel-body col-md-12 col-sm-12 space-4">
+            {% include 'engine/new/paginator.html' %}
+        </div>
     </div>
   </div>
 </div>

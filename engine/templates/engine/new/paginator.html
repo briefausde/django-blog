@@ -1,5 +1,5 @@
+<p style="text-align:center">
 {% if category %}
-<p class="type-centered homepage-see-more">
     {% if posts.paginator.num_pages != 1 %}
     {% if posts.has_previous %}
     <a href="{% url 'get_from_category_pages' category_name=category pk=posts.previous_page_number %}">previous</a> |
@@ -11,10 +11,7 @@
     | <a href="{% url 'get_from_category_pages' category_name=category pk=posts.next_page_number %}">next</a>
     {% endif %}
     {% endif %}
-</p>
 {% else %}
-<div id="pages" style="position:absolute;margin-top:100px;background:#fff;right:50%">
-    <p><a href="{% url 'get_from_category_pages' category_name='all' pk=2 %}">More posts</a></p>
-    <br><br><br><br><br>
-</div>
+    <a href="{% url 'get_from_category_pages' category_name='all' pk=2 %}">More posts</a>
 {% endif %}
+</p>

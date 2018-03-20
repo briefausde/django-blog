@@ -16,7 +16,6 @@ from .models import *
 
 # Mixin view
 
-
 class StaffRequiredMixin(LoginRequiredMixin):
     raise_exception = True
 
@@ -28,7 +27,6 @@ class StaffRequiredMixin(LoginRequiredMixin):
 
 # Register view
 
-
 class RegisterView(generic.CreateView):
     model = User
     form_class = RegisterForm
@@ -39,7 +37,6 @@ class RegisterView(generic.CreateView):
 
 
 # Logs views
-
 
 class LogMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -95,7 +92,6 @@ class LogDetailsView(StaffRequiredMixin, generic.DetailView):
 
 # Users views
 
-
 class UserDetailsView(LogMixin, generic.DetailView):
     model = User
     context_object_name = 'user'
@@ -131,7 +127,6 @@ class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 
 # Comments views
 
-
 class CommentsListView(generic.ListView):
     model = Comment
     context_object_name = 'comments'
@@ -166,7 +161,6 @@ class CommentDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
 
 # Posts views
 
-
 class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
     form_class = PostForm
     template_name = 'engine/new/form_edit.html'
@@ -196,7 +190,7 @@ class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
         return reverse('post_detail', args=(self.object.url,))
 
 
-# main page
+# Main page
 class PostsListView(LogMixin, generic.ListView):
     model = Post
     context_object_name = 'posts'
@@ -238,11 +232,14 @@ class PostDetailsView(LogMixin, generic.DetailView):
         return context
 
     def get_object(self):
-        return Post.objects.filter(url=Post.url_refactoring(Post, self.kwargs['name'])).first()
+        # post = Post.objects.filter(url=Post.url_refactoring(Post, self.kwargs['name'])).first()
+        # if not post:
+        #     raise Http404
+        # return post
+        return get_object_or_404(Post, url=Post.url_refactoring(Post, self.kwargs['name']))
 
 
 # Search view
-
 
 class SearchListView(LogMixin, generic.ListView):
     model = Post

@@ -1,14 +1,12 @@
 {% extends 'engine/new/base.html' %}
 
 {% block content %}
-<div class="page-container-full bg-dark-gray text-contrast text-center">
+<div class="page-container-full bg-dark-gray text-contrast text-center" style="background-image: url({{ post.img_big }});background-repeat: no-repeat;background-size: cover">
 
-  <div id="hero-app" style="position:absolute; width:100%; height: 100%;"></div>
-
-  <div class="space-6 space-top-6">
-    <img height="100" src="/img/projects/binaryalert.png"><br>
+  <div class="space-6 space-top-6" style="text-shadow: 4px 4px 8px #000000">
+    <img class="media-round" height="150" width="150" src="{{ post.img_small }}"><br>
     <div class="h1 space-top-4">{{ post.name|truncatechars:64 }}</div>
-    <h4 class="space-top-2">{{ post.name|truncatechars:128 }}</h4>
+    <h4 class="space-top-2">{{ post.text_small|truncatechars:100 }}</h4>
     <div>
 
       <i class="icon icon-star icon-beach"></i>&nbsp;{{ post.views }}
@@ -25,7 +23,7 @@
     <div class="media-photo media-round space-2">
        <img src="{{ post.author.profile.img }}" alt="{{ post.author }}" height="67" width="67">
      </div>
-     <p class="icon-rausch">{{ post.author }}</p>
+      <p class="icon-rausch"><a href="{% url "user_detail" username=post.author %}">{{ post.author }}</a></p>
 
   </div>
 
@@ -58,34 +56,8 @@
   </div>
 
   <div class="col-md-3 col-sm-12">
-    <a href="t" class="btn btn-primary btn-block">Github</a>
-
-
-
-      <a href="" class="btn btn-block">
-        ES6+ Style Guide
-      </a>
-
-
-      <a href="" class="btn btn-block">
-        React Style Guide
-      </a>
-
-
-      <a href="" class="btn btn-block">
-        CSS-in-JS Style Guide
-      </a>
-
-
-      <a href="" class="btn btn-block">
-        ES5 Style Guide (Deprecated)
-      </a>
-
-
-      <a href="" class="btn btn-block">
-        Gitter
-      </a>
-
+      <a href="" class="btn btn-primary btn-block">Github</a>
+      <a href="{% url 'post_edit' pk=post.pk %}" class="btn btn-block">{{ post.created_date }}</a>
   </div>
 </div>
 {% endblock %}
