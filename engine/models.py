@@ -5,9 +5,16 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.sitemaps import Sitemap
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+
 
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
+
+    def get_absolute_url(self):
+        return reverse('get_from_category', args=(self.name,))
 
     def __str__(self):
         return self.name
@@ -22,8 +29,8 @@ class Post(models.Model):
     text_big = models.TextField()
     tags = models.CharField(max_length=300, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(default=timezone.now)
-    published_date = models.DateTimeField(blank=True, null=True)
+    created_date = models.DateTimeField(default=timezone.now, editable=False)
+    published_date = models.DateTimeField(blank=True, null=True, editable=False)
     views = models.IntegerField(default=0, editable=False)
     url = models.CharField(max_length=300, blank=True)
     comments_mode = models.BooleanField(default=True)
@@ -54,11 +61,6 @@ class Post(models.Model):
 
     def __str__(self):
         return self.name
-
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.contrib.auth.models import User
 
 
 class Profile(models.Model):

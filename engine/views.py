@@ -6,10 +6,10 @@ from django.urls import reverse_lazy
 from engine.utils import paginator
 from .forms import *
 from .models import *
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
+
+from rest_framework import viewsets, permissions
 from rest_framework.permissions import IsAdminUser
-from engine.serializers import UserSerializer, GroupSerializer
+from engine.serializers import *
 
 
 # Js в отдельный файл и убрать из html
@@ -270,6 +270,13 @@ class SearchListView(LogMixin, generic.ListView):
 
 # API
 
+class IsOwnerOrIsStaffOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.author == request.user or request.user.is_staff
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
@@ -279,3 +286,14 @@ class GroupViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsOwnerOrIsStaffOrReadOnly,)
+    queryset = Post.objects.all().order_by('-pk')
+    serializer_class = PostSerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all().order_by('-pk')
+    serializer_class = CategorySerializer
