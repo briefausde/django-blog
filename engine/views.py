@@ -6,6 +6,10 @@ from django.urls import reverse_lazy
 from engine.utils import paginator
 from .forms import *
 from .models import *
+from django.contrib.auth.models import User, Group
+from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser
+from engine.serializers import UserSerializer, GroupSerializer
 
 
 # Js в отдельный файл и убрать из html
@@ -54,7 +58,7 @@ class LogMixin(object):
 
 
 class LogsView(StaffRequiredMixin, generic.TemplateView):
-    template_name = 'engine/new/logs_view.html'
+    template_name = 'engine//logs_view.html'
 
     def get_context_data(self, **kwargs):
         context = super(LogsView, self).get_context_data()
@@ -69,7 +73,7 @@ class LogsView(StaffRequiredMixin, generic.TemplateView):
 class LogsListView(StaffRequiredMixin, generic.ListView):
     model = Log
     context_object_name = 'logs'
-    template_name = 'engine/new/logs_list.html'
+    template_name = 'engine//logs_list.html'
 
     def get_queryset(self):
         filters = self.request.GET.get('filter')
@@ -87,7 +91,7 @@ class LogsListView(StaffRequiredMixin, generic.ListView):
 class LogDetailsView(StaffRequiredMixin, generic.DetailView):
     model = Log
     context_object_name = 'log'
-    template_name = 'engine/new/logs_detail.html'
+    template_name = 'engine//logs_detail.html'
 
 
 # Users views
@@ -95,7 +99,7 @@ class LogDetailsView(StaffRequiredMixin, generic.DetailView):
 class UserDetailsView(LogMixin, generic.DetailView):
     model = User
     context_object_name = 'user'
-    template_name = 'engine/new/user.html'
+    template_name = 'engine//user.html'
 
     def get_object(self):
         return get_object_or_404(self.model, username=self.kwargs['username'])
@@ -104,7 +108,7 @@ class UserDetailsView(LogMixin, generic.DetailView):
 class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = Profile
     fields = ['description', 'img']
-    template_name = 'engine/new/form_edit.html'
+    template_name = 'engine//form_edit.html'
 
     def get_object(self, queryset=None):
         return self.model.objects.get(user__username=self.request.user)
@@ -116,7 +120,7 @@ class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = User
     fields = ['email']
-    template_name = 'engine/new/form_edit.html'
+    template_name = 'engine//form_edit.html'
 
     def get_object(self, queryset=None):
         return self.model.objects.get(username=self.request.user)
@@ -130,7 +134,7 @@ class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 class CommentsListView(generic.ListView):
     model = Comment
     context_object_name = 'comments'
-    template_name = 'engine/new/comments.html'
+    template_name = 'engine//comments.html'
 
     def get_queryset(self):
         return self.model.objects.filter(post__pk=self.kwargs['post_id']).order_by('-pk')
@@ -139,7 +143,7 @@ class CommentsListView(generic.ListView):
 class CommentAddView(LoginRequiredMixin, LogMixin, generic.CreateView):
     model = Comment
     fields = ['text']
-    template_name = "engine/new/comments.html"
+    template_name = "engine//comments.html"
     success_url = '/'
 
     def form_valid(self, form):
@@ -163,7 +167,7 @@ class CommentDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
 
 class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
     form_class = PostForm
-    template_name = 'engine/new/form_edit.html'
+    template_name = 'engine//form_edit.html'
 
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data()
@@ -178,7 +182,7 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
 class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'engine/new/form_edit.html'
+    template_name = 'engine//form_edit.html'
 
     def get_object(self, queryset=None):
         post = super(PostEditView, self).get_object()
@@ -194,7 +198,7 @@ class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 class PostsListView(LogMixin, generic.ListView):
     model = Post
     context_object_name = 'posts'
-    template_name = 'engine/new/post_list.html'
+    template_name = 'engine//post_list.html'
 
     def get_context_data(self, **kwargs):
         context = super(PostsListView, self).get_context_data(**kwargs)
@@ -219,7 +223,7 @@ class PostsListView(LogMixin, generic.ListView):
 class PostDetailsView(LogMixin, generic.DetailView):
     model = Post
     context_object_name = 'post'
-    template_name = 'engine/new/post_detail.html'
+    template_name = 'engine//post_detail.html'
 
     def get_context_data(self, **kwargs):
         post = self.get_object()
@@ -244,7 +248,7 @@ class PostDetailsView(LogMixin, generic.DetailView):
 class SearchListView(LogMixin, generic.ListView):
     model = Post
     context_object_name = 'posts'
-    template_name = "engine/new/search.html"
+    template_name = "engine//search.html"
 
     def get_context_data(self, **kwargs):
         context = super(SearchListView, self).get_context_data()
@@ -256,9 +260,22 @@ class SearchListView(LogMixin, generic.ListView):
         else:
             posts = Index.find(Index, word)
             if posts:
-                self.template_name = "engine/new/post_list.html"
+                self.template_name = "engine//post_list.html"
                 context['posts'] = paginator(posts, self.request.GET.get('pk', 1), 15)
                 context['query'] = word
             else:
                 context['text'] = "Nothing found"
         return context
+
+
+# API
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer

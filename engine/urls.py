@@ -5,12 +5,19 @@ from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth.views import *
 from engine.utils import reload
 from django.contrib.flatpages.sitemaps import FlatPageSitemap
+from rest_framework import routers
 
 
 sitemaps = {
     "pages": EngineSitemap,
     "flatpages": FlatPageSitemap
 }
+
+
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'groups', views.GroupViewSet)
+
 
 accounts_urlpatterns = [
     url(r'^login/$',
@@ -74,5 +81,7 @@ urlpatterns = [
     url(r'^comments/(?P<post_id>[\d+]*)$', views.CommentsListView.as_view(), name='comments'),
     url(r'^comments/add/(?P<post_id>[\d+]*)$', views.CommentAddView.as_view(), name='add_comment'),
     url(r'^comments/remove/$', views.CommentDeleteView.as_view(), name='remove_comment'),
-    url(r'', include('django.contrib.flatpages.urls')),
+    url(r'^', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'', include('django.contrib.flatpages.urls'))  # this include always must be in the end
 ]
