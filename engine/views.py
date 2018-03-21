@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from django.template.context_processors import csrf
 from django.views import generic
 from django.urls import reverse_lazy
@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAdminUser
 from engine.serializers import *
 
 
+# hide user email from api and from profile
 # Js в отдельный файл и убрать из html
 # Убрать логи, добавить кеширование
 # Python manage.py commands
@@ -159,7 +160,7 @@ class CommentDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
     def get_object(self, queryset=None):
         comment = get_object_or_404(Comment, pk=self.request.POST.get("id"))
         if not comment.author == self.request.user and not self.request.user.is_staff:
-            raise Http404
+            raise PermissionDenied
         return comment
 
 
@@ -187,7 +188,7 @@ class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     def get_object(self, queryset=None):
         post = super(PostEditView, self).get_object()
         if not post.author == self.request.user and not self.request.user.is_staff:
-            raise Http404
+            raise PermissionDenied
         return post
 
     def get_success_url(self):

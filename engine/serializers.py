@@ -4,9 +4,12 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    img = serializers.CharField(source='profile.img')
+    description = serializers.CharField(source='profile.description')
+
     class Meta:
         model = User
-        fields = ('url', 'username', 'email', 'groups')
+        fields = ('url', 'username', 'email', 'groups', 'img', 'description')
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
