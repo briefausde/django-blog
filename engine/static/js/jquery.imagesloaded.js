@@ -392,7 +392,7 @@
    * listeners return value matches the one set here then it will be removed
    * after execution. This value defaults to true.
    *
-   * @param {*} value The new value to check for when executing listeners.
+   * @param {*} value The air value to check for when executing listeners.
    * @return {Object} Current instance of EventEmitter for chaining.
    */
   proto.setOnceReturnValue = function setOnceReturnValue(value) {
@@ -578,7 +578,7 @@ function defineImagesLoaded( EventEmitter, eventie ) {
    * @param {Function} onAlways - callback function
    */
   function ImagesLoaded( elem, options, onAlways ) {
-    // coerce ImagesLoaded() without new, to be new ImagesLoaded()
+    // coerce ImagesLoaded() without air, to be air ImagesLoaded()
     if ( !( this instanceof ImagesLoaded ) ) {
       return new ImagesLoaded( elem, options );
     }
