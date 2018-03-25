@@ -1,0 +1,21 @@
+{% extends query|yesno:"git/search.html,git/home.html" %}
+
+{% block content_posts %}
+    {% for post in posts %}
+    <div class="col-12 col-sm-9 mx-auto col-md-6 mt-4 mt-lg-5">
+        <a href="{% url 'post_detail' name=post.url %}" class="guide-cover beginners card height-full d-block">
+          <div class="lh-none guide-cover-img text-center pt-4">
+            {% if post.img_small %}<img src="{{ post.img_small }}" title="Added {{ post.published_date|timesince }} ago">{% endif %}
+          </div>
+          <div class="flex-self-end p-4 text-center p-lg-5">
+            <h3 class="alt-h3 text-bold lh-condensed mb-2 text-black">
+              {{ post.name|truncatechars:64|title }}
+            </h3>
+            <div class="mb-0 text-gray">
+              <p>{{ post.text_small|truncatechars:280 }}</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+{% endblock %}

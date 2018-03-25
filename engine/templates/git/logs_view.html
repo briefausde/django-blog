@@ -1,0 +1,31 @@
+{% extends 'git/base.html' %}
+
+{% block content %}
+<script type="text/javascript">
+    function updateLogs() {
+        $.ajax({
+            url: "{% url 'logs_list' %}",
+            cache: false,
+            data: {
+                {% if filter %}filter: '{{ filter }}',{% endif %}
+                {% if path %}path: '{{ path }}',{% endif %}
+                {% if ip %}ip: '{{ ip }}',{% endif %}
+                {% if author %}author: '{{ author }}',{% endif %}
+                {% if data %}data: '{{ data }}',{% endif %}
+            },
+            success: function(html){
+                $("#logs").html(html);
+            }
+        });
+    }
+    $(document).ready(function(){
+        updateLogs();
+        setInterval('updateLogs()', 3000);
+    });
+</script>
+<ul id="tiles">
+    <a href="{% url "logs_view" %}">Clear filters</a>
+    <br><br><br>
+    <div id="logs"></div>
+</ul>
+{% endblock %}
