@@ -1,5 +1,5 @@
 # djs
-Simple django news website with jquery elements. 
+Simple Django blog website. 
 
 # How to start
 First you need to install requirements in your virtual environment
@@ -24,7 +24,7 @@ Then start the site
 > python manage.py runserver
 
 
-Go to `(url)/admin/` and log in, then select `categories` section and create a category.
+Go to `(url)/admin/` and log in as superuser, then select `categories` section and create a category.
 After that you can freely add material.
 
 # Feautures
@@ -33,5 +33,5 @@ After that you can freely add material.
 * static pages;
 * comments;
 * custom search engine based on inverted indexes;
-* custom add/edit pages;
-* custom small logging system.
+* custom create and edit pages;
+* custom logging system.
