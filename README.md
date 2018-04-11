@@ -2,7 +2,7 @@
 Simple Django blog website. 
 
 # How to start
-First you need to install requirements in your virtual environment
+Clone repository and install requirements in your virtual environment
 > pip install -r requirements.txt
 
 and make migrations
