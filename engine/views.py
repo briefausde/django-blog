@@ -12,7 +12,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.permissions import IsAdminUser
 from engine.serializers import *
 
-#
+
 # hide user email from api and from profile
 # Js в отдельный файл и убрать из html
 # Убрать логи, добавить кеширование
