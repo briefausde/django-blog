@@ -31,6 +31,16 @@ class StaffRequiredMixin(LoginRequiredMixin):
         return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
+class AuthorRequiredMixin(LoginRequiredMixin):
+    raise_exception = True
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.author == self.request.user and not self.request.user.is_staff:
+            return self.handle_no_permission()
+        return super(AuthorRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
 # Register view
 
 class RegisterView(generic.CreateView):
@@ -154,15 +164,12 @@ class CommentAddView(LoginRequiredMixin, LogMixin, generic.CreateView):
         return super(CommentAddView, self).form_valid(form)
 
 
-class CommentDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
+class CommentDeleteView(AuthorRequiredMixin, LogMixin, generic.DeleteView):
     model = Comment
     success_url = '/'
 
     def get_object(self, queryset=None):
-        comment = get_object_or_404(Comment, pk=self.request.POST.get("id"))
-        if not comment.author == self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied
-        return comment
+        return get_object_or_404(Comment, pk=self.request.POST.get("id"))
 
 
 # Posts views
@@ -181,7 +188,7 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
         return super(PostCreateView, self).form_valid(form)
 
 
-class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
+class PostEditView(AuthorRequiredMixin, LogMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'engine/form_edit.html'
@@ -191,17 +198,11 @@ class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
         context['button_delete_show'] = True
         return context
 
-    def get_object(self, queryset=None):
-        post = super(PostEditView, self).get_object()
-        if not post.author == self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied
-        return post
-
     def get_success_url(self):
         return reverse('post_detail', args=(self.object.url,))
 
 
-class PostDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
+class PostDeleteView(AuthorRequiredMixin, LogMixin, generic.DeleteView):
     model = Post
     success_url = '/'
 
@@ -212,14 +213,10 @@ class PostDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
             return HttpResponseRedirect(self.success_url)
         elif self.request.POST.get("cancel"):
             return HttpResponseRedirect(post.get_absolute_url())
-        else:
-            return self.get(self, *args, **kwargs)
+        return self.get(self, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        if not post.author == self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied
-        return post
+        return get_object_or_404(Post, pk=self.kwargs['pk'])
 
 
 # Main page
@@ -321,6 +318,12 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOwnerOrIsStaffOrReadOnly,)
     queryset = Post.objects.all().order_by('-pk')
     serializer_class = PostSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

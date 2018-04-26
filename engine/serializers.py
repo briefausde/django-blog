@@ -27,5 +27,4 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Post
-        fields = ('url', 'pk', 'name', 'text_small', 'category', 'author',
-                  'tags', 'img_small', 'created_date', 'published_date', 'views')
+        fields = ('url', 'name', 'text_small', 'text_big', 'img_small', 'img_big', 'tags', 'category', 'comments_mode')
