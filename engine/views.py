@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseRedirect
 from django.template.context_processors import csrf
 from django.views import generic
 from django.urls import reverse_lazy
@@ -185,6 +186,11 @@ class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     form_class = PostForm
     template_name = 'engine/form_edit.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(PostEditView, self).get_context_data(**kwargs)
+        context['button_delete_show'] = True
+        return context
+
     def get_object(self, queryset=None):
         post = super(PostEditView, self).get_object()
         if not post.author == self.request.user and not self.request.user.is_staff:
@@ -195,7 +201,29 @@ class PostEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
         return reverse('post_detail', args=(self.object.url,))
 
 
+class PostDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
+    model = Post
+    success_url = '/'
+
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()
+        if self.request.POST.get("confirm_delete"):
+            post.delete()
+            return HttpResponseRedirect(self.success_url)
+        elif self.request.POST.get("cancel"):
+            return HttpResponseRedirect(post.get_absolute_url())
+        else:
+            return self.get(self, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        if not post.author == self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied
+        return post
+
+
 # Main page
+
 class PostsListView(LogMixin, generic.ListView):
     model = Post
     context_object_name = 'posts'
