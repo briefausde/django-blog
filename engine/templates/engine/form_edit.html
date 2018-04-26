@@ -7,7 +7,9 @@
                 {{ form.as_p }}
                 <br>
                 <input type="submit" value="Submit change">
-                {% if button_delete_show %}<a href="{% url 'post_delete' post.pk %}">Delete post</a>{% endif %}
+                {% if button_delete_show %}
+                    <br><a href="{% url 'post_delete' post.pk %}" style="color:red">Delete post</a>
+                {% endif %}
                 <br><br>
             </form>
         </div>

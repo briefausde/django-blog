@@ -112,6 +112,11 @@ class UserDetailsView(LogMixin, generic.DetailView):
     context_object_name = 'user'
     template_name = 'engine/user.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(UserDetailsView, self).get_context_data(**kwargs)
+        context['posts'] = Post.objects.filter(author__username=self.kwargs['username'])
+        return context
+
     def get_object(self):
         return get_object_or_404(self.model, username=self.kwargs['username'])
 

@@ -25,5 +25,13 @@
                 </div>
             </div>
         </div>
+    {% if posts %}
+        <div style="margin-top:100px;margin-bottom:100px;font-size:20px">
+            <p>{{ user|title }}'s articles:</p><br>
+            {% for post in posts %}
+                <a href="{% url "post_detail" name=post.url %}">{{ post.name }}</a><br>
+            {% endfor %}
+        </div>
+    {% endif %}
     </div>
 {% endblock %}
