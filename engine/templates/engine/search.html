@@ -30,6 +30,8 @@ $(document).ready(function(){
     </div>
 
 {% if query %}
+<br>
+<center>
 <p class="type-centered homepage-see-more">
     {% if posts.has_previous %}
     <a href="{% url 'find_word_pages' pk=posts.previous_page_number %}?q={{ query }}">previous</a> |
@@ -41,6 +43,8 @@ $(document).ready(function(){
     | <a href="{% url 'find_word_pages' pk=posts.next_page_number %}?q={{ query }}">next</a>
     {% endif %}
 </p>
+<br><br><br><br>
+</center>
 {% endif %}
 
 {% endblock %}

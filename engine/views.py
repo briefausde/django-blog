@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.template.context_processors import csrf
 from django.views import generic
@@ -9,7 +8,7 @@ from .forms import *
 from .models import *
 
 from rest_framework import viewsets, permissions
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
 from engine.serializers import *
 
 
@@ -315,7 +314,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsOwnerOrIsStaffOrReadOnly,)
+    permission_classes = (IsOwnerOrIsStaffOrReadOnly, IsAuthenticatedOrReadOnly,)
     queryset = Post.objects.all().order_by('-pk')
     serializer_class = PostSerializer
 

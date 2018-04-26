@@ -102,7 +102,7 @@ class Index(models.Model):
         for i in range(1, last_pk + 1):
             try:
                 post = get_object_or_404(Post, pk=i)
-                words = split_str(post.text_big)
+                words = split_str(post.text_big + " " + post.name)
                 for word in words:
                     if len(word) > 1:
                         if not indexes.get(word):
@@ -116,7 +116,7 @@ class Index(models.Model):
 
     def add(self, pk):
         post = get_object_or_404(Post, pk=pk)
-        words = split_str(post.text_big)
+        words = split_str(post.text_big + " " + post.name)
         for word in words:
             if len(word) > 1:
                 indexes = set()
@@ -148,7 +148,10 @@ class Index(models.Model):
             for i in range(len(pk_list) - 1):
                 intersection_pk = set(pk_list[i]) & set(pk_list[i + 1])
             for pk in intersection_pk:
-                posts.append(Post.objects.get(pk=pk))
+                try:
+                    posts.append(Post.objects.get(pk=pk))
+                except:
+                    None
 
         return posts
 
