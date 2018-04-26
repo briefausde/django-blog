@@ -35,7 +35,7 @@
 			<div class="user">
 				<ul>
 					{% if request.user.is_authenticated %}
-					<li><a href="{% url 'user_detail' username=request.user %}">{% if user.profile.img %}<img src="{{ user.profile.img }}" width="43px" height="43px" title="{{ request.user }}" />{% endif %} {{ request.user }}</a></li>
+					<li><a href="{% url 'user_detail' username=request.user %}">{% if request.user.profile.img %}<img src="{{ request.user.profile.img }}" width="43px" height="43px" title="{{ request.user }}" />{% endif %} {{ request.user }}</a></li>
 					{% else %}
 					<li><a href="{% url 'accounts:login' %}">Sign in/up</a></li>
 					{% endif %}
