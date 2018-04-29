@@ -1,0 +1,11 @@
+{% extends "engine/home.html" %}
+
+{% block content %}
+<div id="main" role="main">
+    <ul id="tiles">
+        {% for feedback in feedback_list %}
+            <p><a href="{% url "feedback_detail" feedback.pk %}">[{{ feedback.date|date:"G:i:s" }}] {{ feedback.subject }}</a></p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

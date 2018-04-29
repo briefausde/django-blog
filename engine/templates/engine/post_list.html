@@ -11,15 +11,15 @@
                         <span><a href="{% url 'post_detail' name=post.url %}"><label> </label>{{ post.published_date|timesince }} ago</a></span>
                         <p>{{ post.text_small|truncatechars:280 }}</p>
                     </div>
-                    <div class="post-info-rate-share">
-                        <div class="rateit">
-                            <span> </span>
-                        </div>
-                        <div class="post-share">
-                            <a href="share-{{ post.pk }}"><span> </span></a>
-                        </div>
-                        <div class="clear"> </div>
-                    </div>
+                    <!--<div class="post-info-rate-share">-->
+                        <!--<div class="rateit">-->
+                            <!--<span> </span>-->
+                        <!--</div>-->
+                        <!--<div class="post-share">-->
+                            <!--<a href="share-{{ post.pk }}"><span> </span></a>-->
+                        <!--</div>-->
+                        <!--<div class="clear"> </div>-->
+                    <!--</div>-->
                 </div>
             </li>
         {% endfor %}

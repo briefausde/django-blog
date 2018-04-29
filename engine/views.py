@@ -105,6 +105,30 @@ class LogDetailsView(StaffRequiredMixin, generic.DetailView):
     template_name = 'engine/logs_detail.html'
 
 
+# Feedback views
+
+class FeedbackSendView(LogMixin, generic.CreateView):
+    model = Feedback
+    fields = ['email', 'subject', 'message']
+    template_name = "engine/form_default.html"
+    success_url = "/"
+
+
+class FeedbackListView(StaffRequiredMixin, LogMixin, generic.ListView):
+    model = Feedback
+    context_object_name = 'feedback_list'
+    template_name = "engine/feedback_list.html"
+
+    def get_queryset(self):
+        return self.model.objects.all().order_by('-date')
+
+
+class FeedbackDetailsView(StaffRequiredMixin, LogMixin, generic.DetailView):
+    model = Feedback
+    context_object_name = 'feedback'
+    template_name = "engine/feedback_detail.html"
+
+
 # Users views
 
 class UserDetailsView(LogMixin, generic.DetailView):
@@ -124,7 +148,7 @@ class UserDetailsView(LogMixin, generic.DetailView):
 class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = Profile
     fields = ['description', 'img']
-    template_name = 'engine/form_edit.html'
+    template_name = 'engine/form_default.html'
 
     def get_object(self, queryset=None):
         return self.model.objects.get(user__username=self.request.user)
@@ -136,7 +160,7 @@ class UserEditView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = User
     fields = ['email']
-    template_name = 'engine/form_edit.html'
+    template_name = 'engine/form_default.html'
 
     def get_object(self, queryset=None):
         return self.model.objects.get(username=self.request.user)
@@ -180,7 +204,7 @@ class CommentDeleteView(AuthorRequiredMixin, LogMixin, generic.DeleteView):
 
 class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
     form_class = PostForm
-    template_name = 'engine/form_edit.html'
+    template_name = 'engine/form_default.html'
 
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data()
@@ -195,7 +219,7 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
 class PostEditView(AuthorRequiredMixin, LogMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'engine/form_edit.html'
+    template_name = 'engine/form_default.html'
 
     def get_context_data(self, **kwargs):
         context = super(PostEditView, self).get_context_data(**kwargs)

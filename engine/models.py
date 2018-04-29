@@ -26,7 +26,7 @@ class Post(models.Model):
     img_small = models.CharField(max_length=500, default="/static/media/small_default_image.jpg", blank=True)
     img_big = models.CharField(max_length=500, default="/static/media/big_default_image.jpg", blank=True)
     text_small = models.CharField(max_length=280, blank=True)
-    text_big = models.TextField()
+    text_big = models.TextField(max_length=20000)
     tags = models.CharField(max_length=300, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now, editable=False)
@@ -61,6 +61,13 @@ class Post(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Feedback(models.Model):
+    email = models.EmailField()
+    subject = models.CharField(max_length=60)
+    message = models.TextField(max_length=2000)
+    date = models.DateTimeField(default=timezone.now)
 
 
 class Profile(models.Model):
@@ -171,7 +178,7 @@ class Log(models.Model):
         data = ""
         if self.data:
             data = " data: " + self.data
-        return "[" + str(self.date) + "] " + self.user + " (" + self.ip + ") " + self.method + " " + self.path + data
+        return "[" + str(self.date) + "] " + self.author + " (" + self.ip + ") " + self.method + " " + self.path + data
 
 
 class Comment(models.Model):

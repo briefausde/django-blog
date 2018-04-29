@@ -6,7 +6,7 @@
             <form method="POST" class="post-form">{% csrf_token %}
                 {{ form.as_p }}
                 <br>
-                <input type="submit" value="Submit change">
+                <input type="submit" value="Submit">
                 {% if button_delete_show %}
                     <br><a href="{% url 'post_delete' post.pk %}" style="color:red">Delete post</a>
                 {% endif %}

@@ -2,7 +2,7 @@
 <div class="header">
 	<div class="wrap">
 		<div class="logo">
-			<a href="/"><img src="http://www.gardencentreguide.ie/data/site_5/files/images/logo%20Garden%20Connect.jpg" width="154px" height="52px" title="pinbal" /></a>
+			<a href="/"><img src="https://codelabs.developers.google.com/codelabs/mobile-vision-ocr/img/c5134dae01ad22a5.png" width="154px" height="52px" title="pinbal" /></a>
 		</div>
 		<div class="nav-icon">
 			<a href="#" class="right_bt" id="activator"><span> </span> </a>
@@ -15,7 +15,7 @@
 							<ul>
 								<li><a href="/"><span>Home</span></a></li>
 								<li><a href="{% url 'get_from_category' category_name='news' %}"><span>News</span></a></li>
-                                <li><a href="/about"><span>About</span></a></li>
+                                <li><a href="{% url 'feedback_send' %}"><span>Feedback</span></a></li>
 								{% if request.user.is_authenticated %}<li><a href="{% url 'accounts:logout' %}"><span>Logout</span></a></li>{% endif %}
 								<div class="clear"> </div>
 							</ul>

@@ -1,0 +1,13 @@
+{% extends 'engine/base.html' %}
+
+{% block content %}
+<div id="main" role="main">
+    <ul id="tiles">
+        <p><b>Date:</b> {{ feedback.date|date:"d/m/Y G:i:s" }}</p>
+        <p><b>Author email:</b> {{ feedback.email }}</p>
+        <p><b>Subject:</b> {{ feedback.subject }}</p>
+        <p><b>Message:</b> {{ feedback.message }}</p>
+        <br><p><a href="mailto:{{ feedback.email }}">Send answer</a></p>
+    </ul>
+</div>
+{% endblock %}

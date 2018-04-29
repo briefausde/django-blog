@@ -1,12 +1,13 @@
 {% block content %}
 <div class="footer">
     {% if user.is_staff %}
-    <a href="/admin/">adm</a> |
-    <a href="{% url "logs_view" %}">log</a> |
-    <a href="{% url "post_new" %}">post</a> |
-    <a href="{% url "reload" %}">reload</a>
+        <a href="/admin/">adm</a> |
+        <a href="{% url "logs_view" %}">log</a> |
+        <a href="{% url "post_new" %}">post</a> |
+        <a href="{% url "feedback_list" %}">feedback</a> |
+        <a href="{% url "reload" %}">reload</a>
     {% else %}
-    <a href="{% url "post_new" %}">New post</a>
+        <a href="{% url "post_new" %}">New post</a>
     {% endif %}
 </div>
 {% endblock %}
