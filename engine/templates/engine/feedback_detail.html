@@ -1,13 +1,41 @@
 {% extends 'engine/base.html' %}
 
 {% block content %}
-<div id="main" role="main">
-    <ul id="tiles">
-        <p><b>Date:</b> {{ feedback.date|date:"d/m/Y G:i:s" }}</p>
-        <p><b>Author email:</b> {{ feedback.email }}</p>
-        <p><b>Subject:</b> {{ feedback.subject }}</p>
-        <p><b>Message:</b> {{ feedback.message }}</p>
-        <br><p><a href="mailto:{{ feedback.email }}">Send answer</a></p>
-    </ul>
-</div>
+    <div id="main" role="main">
+        <ul id="tiles">
+            <p onclick="window.history.back();"><- BACK</p><br>
+            <p><b>Date:</b> {{ feedback.date|date:"d/m/Y G:i:s" }}</p>
+            <p><b>Author email:</b> {{ feedback.email }}</p>
+            <p><b>Subject:</b> {{ feedback.subject }}</p>
+            <p><b>Message:</b> {{ feedback.message }}</p>
+            <br><p><a href="mailto:{{ feedback.email }}">Send answer</a></p>
+            <br>
+            <p>
+                <a href="#" onclick="AjaxFeedbackAnswered({{ feedback.pk }});return false;" id="{{ feedback.pk }}" data="{{ feedback.status }}">
+                    {% if feedback.status == True %}Viewed{% else %}Close feedback{% endif %}
+                </a>
+            </p>
+        </ul>
+    </div>
+    <script>
+    function AjaxFeedbackAnswered(pk){
+        $.ajax({
+            url: "{% url 'feedback_answered' %}",
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                pk: pk
+            },
+            success: function() {
+                if($('#' + pk).attr('data') == "True") {
+                    $('#' + pk).html("Close feedback");
+                    $('#' + pk).attr('data', 'False');
+                } else {
+                    $('#' + pk).html("Viewed");
+                    $('#' + pk).attr('data', "True");
+                }
+            }
+        });
+    }
+    </script>
 {% endblock %}

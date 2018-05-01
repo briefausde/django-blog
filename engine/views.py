@@ -14,12 +14,13 @@ from engine.serializers import *
 
 # hide user email from api and from profile
 # Js в отдельный файл и убрать из html
-# Убрать логи, добавить кеширование
 # Python manage.py commands
 # Js (jQuery), databases, book, Django REST
+# fix password_reset_confirm
+# архив, модерация постов для всего сайта, загрузка картинок, убрать логи, добавить кеширование
 
 
-# Mixin view
+# Mixin views
 
 class StaffRequiredMixin(LoginRequiredMixin):
     raise_exception = True
@@ -120,13 +121,29 @@ class FeedbackListView(StaffRequiredMixin, LogMixin, generic.ListView):
     template_name = "engine/feedback_list.html"
 
     def get_queryset(self):
-        return self.model.objects.all().order_by('-date')
+        return self.model.objects.all().order_by('-date')[0:100]
 
 
 class FeedbackDetailsView(StaffRequiredMixin, LogMixin, generic.DetailView):
     model = Feedback
     context_object_name = 'feedback'
     template_name = "engine/feedback_detail.html"
+
+
+class FeedbackAnsweredView(StaffRequiredMixin, LogMixin, generic.UpdateView):
+    model = Feedback
+    fields = ['status']
+    success_url = "/"
+    template_name = "engine/base.html"
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(self.model, pk=self.request.POST.get('pk'))
+
+    def post(self, *args, **kwargs):
+        feedback = self.get_object()
+        feedback.status = not feedback.status
+        feedback.save()
+        return self.get(self, *args, **kwargs)
 
 
 # Users views
@@ -284,7 +301,7 @@ class PostDetailsView(LogMixin, generic.DetailView):
         post.update_views()
         context = super(PostDetailsView, self).get_context_data()
         from math import floor
-        time = floor(len(post.text_big) * 0.075 / 60) + 1
+        time = floor(len(post.text_big) * 0.075 / 60) + 1  # move to models
         context['read_time'] = time
         context['user'] = self.request.user
         return context

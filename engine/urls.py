@@ -82,6 +82,7 @@ urlpatterns = [
     url(r'^feedback/$', views.FeedbackSendView.as_view(), name='feedback_send'),
     url(r'^feedback/list/$', views.FeedbackListView.as_view(), name='feedback_list'),
     url(r'^feedback/(?P<pk>[0-9]+)/$', views.FeedbackDetailsView.as_view(), name='feedback_detail'),
+    url(r'^feedback/answered/$', views.FeedbackAnsweredView.as_view(), name='feedback_answered'),
     url(r'^reload/$', reload, name='reload'),
     url(r'^accounts/', include(accounts_urlpatterns, namespace='accounts')),
     url(r'^comments/(?P<post_id>[\d+]*)/$', views.CommentsListView.as_view(), name='comments'),
