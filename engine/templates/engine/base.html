@@ -72,6 +72,25 @@
 		      }
 		      applyLayout();
 		    })(jQuery);
+
+            {% if request.user.is_authenticated %}
+		    function AjaxNotificationsCount(){
+                $.ajax({
+                    url: "{% url 'notifications_count' %}",
+                    type: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function(html){
+                        $('#notifications').html(html);
+                    }
+                });
+            }
+            $(document).ready(function(){
+                AjaxNotificationsCount();
+                setInterval('AjaxNotificationsCount()', 10000);
+            });
+            {% endif %}
     </script>
 	</body>
 </html>

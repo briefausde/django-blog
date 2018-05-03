@@ -63,6 +63,29 @@ class Post(models.Model):
         return self.name
 
 
+from django.db import models
+from django.db.models import signals
+
+
+@receiver(signals.post_save, sender=Post)
+def create_post(sender, instance, **kwargs):
+    subscribers = AuthorsSubscriber.objects.filter(author__username=instance.author)
+    for subscriber in subscribers:
+        NewPostNotification.objects.create(authors_subscriber=subscriber, post=instance)
+
+
+class AuthorsSubscriber(models.Model):
+    author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='author')
+    subscriber = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='subscriber')
+
+
+class NewPostNotification(models.Model):
+    authors_subscriber = models.ForeignKey(AuthorsSubscriber, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=timezone.now)
+    status = models.BooleanField(default=False)
+
+
 class Feedback(models.Model):
     email = models.EmailField()
     subject = models.CharField(max_length=60)

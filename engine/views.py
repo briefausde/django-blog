@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.template.context_processors import csrf
 from django.views import generic
 from django.urls import reverse_lazy
@@ -18,6 +18,9 @@ from engine.serializers import *
 # Js (jQuery), databases, book, Django REST
 # fix password_reset_confirm
 # архив, модерация постов для всего сайта, загрузка картинок, убрать логи, добавить кеширование
+
+# notifications: проверка на авторизованного юзера, проверка или это подписка на тебя, исправить ajaxunsub & ajaxsub
+# поменять в сигналах post_save на pre_save
 
 
 # Mixin views
@@ -156,6 +159,8 @@ class UserDetailsView(LogMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserDetailsView, self).get_context_data(**kwargs)
         context['posts'] = Post.objects.filter(author__username=self.kwargs['username'])
+        if self.request.user.subscriber.filter(author__username=self.kwargs['username']):
+            context['subscribe'] = True
         return context
 
     def get_object(self):
@@ -184,6 +189,79 @@ class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 
     def get_success_url(self):
         return reverse('user_detail', args=(self.object.username,))
+
+
+# Notifications views
+
+class SubscribeOnUserNotificationsView(LogMixin, LoginRequiredMixin, generic.View):
+
+    def post(self, *args, **kwargs):
+        if not self.request.user.subscriber.filter(author__username=self.request.POST.get('author')):
+            AuthorsSubscriber.objects.create(
+                author=get_object_or_404(User, username=self.request.POST.get('author')),
+                subscriber=self.request.user
+            )
+        return HttpResponseRedirect('/')
+
+
+class UnSubscribeOnUserNotificationsView(LogMixin, LoginRequiredMixin, generic.DeleteView):
+    model = AuthorsSubscriber
+    success_url = '/'
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(AuthorsSubscriber,
+                                 subscriber=self.request.user,
+                                 author=get_object_or_404(User, username=self.request.POST.get('author'))
+                                 )
+
+
+class NotificationsListView(LogMixin, LoginRequiredMixin, generic.ListView):
+    model = NewPostNotification
+    context_object_name = 'notifications'
+    template_name = 'engine/notifications.html'
+
+    def get_queryset(self):
+        return self.model.objects.filter(authors_subscriber__subscriber=self.request.user).order_by('-date')[0:50]
+
+
+class NotificationsCountView(LogMixin, LoginRequiredMixin, generic.View):
+
+    def post(self, *args, **kwargs):
+        notifications = NewPostNotification.objects.filter(
+            authors_subscriber__subscriber=self.request.user,
+            status=False
+        ).count()
+        return HttpResponse(notifications)
+
+
+class NotificationViewedView(StaffRequiredMixin, LogMixin, generic.UpdateView):
+    model = NewPostNotification
+    fields = ['status']
+    success_url = "/"
+    template_name = "engine/base.html"
+
+    def get_object(self, queryset=None):
+        owner = NewPostNotification.objects.get(pk=self.request.POST.get("pk")).authors_subscriber.subscriber.username
+        if owner == self.request.user.username:
+            return get_object_or_404(self.model, pk=self.request.POST.get('pk'))
+        return HttpResponseForbidden()
+
+    def post(self, *args, **kwargs):
+        notification = self.get_object()
+        notification.status = True
+        notification.save()
+        return self.get(self, *args, **kwargs)
+
+
+class NotificationDeleteView(LogMixin, generic.DeleteView):
+    model = NewPostNotification
+    success_url = '/'
+
+    def get_object(self, queryset=None):
+        owner = NewPostNotification.objects.get(pk=self.request.POST.get("pk")).authors_subscriber.subscriber.username
+        if owner == self.request.user.username:
+            return get_object_or_404(NewPostNotification, pk=self.request.POST.get("pk"))
+        return HttpResponseForbidden()
 
 
 # Comments views
