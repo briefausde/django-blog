@@ -82,7 +82,9 @@
                         csrfmiddlewaretoken: '{{ csrf_token }}',
                     },
                     success: function(html){
-                        $('#notifications').html(html);
+                        if (html > 0) {
+                            $('#notifications').html(html);
+                        }
                     }
                 });
             }

@@ -36,11 +36,11 @@ Go to `(url)/admin/` and log in as superuser, then select `categories` section a
 After that you can freely add material.
 
 # Feautures
-* django admin panel;
-* users profile page;
+* users profiles pages;
 * static pages;
 * comments;
-* feedback;
+* feedback page;
 * custom search engine based on inverted indexes;
 * custom create and edit pages;
+* custom notification system;
 * custom logging system.

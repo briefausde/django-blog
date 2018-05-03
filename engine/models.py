@@ -7,6 +7,7 @@ from django.contrib.sitemaps import Sitemap
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db.models import signals
 from django.contrib.auth.models import User
 
 
@@ -63,15 +64,12 @@ class Post(models.Model):
         return self.name
 
 
-from django.db import models
-from django.db.models import signals
-
-
 @receiver(signals.post_save, sender=Post)
-def create_post(sender, instance, **kwargs):
-    subscribers = AuthorsSubscriber.objects.filter(author__username=instance.author)
-    for subscriber in subscribers:
-        NewPostNotification.objects.create(authors_subscriber=subscriber, post=instance)
+def create_post(sender, instance, created, **kwargs):
+    if created:
+        subscribers = AuthorsSubscriber.objects.filter(author__username=instance.author)
+        for subscriber in subscribers:
+            NewPostNotification.objects.create(authors_subscriber=subscriber, post=instance)
 
 
 class AuthorsSubscriber(models.Model):

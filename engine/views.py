@@ -19,8 +19,7 @@ from engine.serializers import *
 # fix password_reset_confirm
 # архив, модерация постов для всего сайта, загрузка картинок, убрать логи, добавить кеширование
 
-# notifications: проверка на авторизованного юзера, проверка или это подписка на тебя, исправить ajaxunsub & ajaxsub
-# поменять в сигналах post_save на pre_save
+# union ajaxunsub & ajaxsub
 
 
 # Mixin views
@@ -159,8 +158,9 @@ class UserDetailsView(LogMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserDetailsView, self).get_context_data(**kwargs)
         context['posts'] = Post.objects.filter(author__username=self.kwargs['username'])
-        if self.request.user.subscriber.filter(author__username=self.kwargs['username']):
-            context['subscribe'] = True
+        if self.request.user.is_authenticated:
+            if self.request.user.subscriber.filter(author__username=self.kwargs['username']):
+                context['subscribe'] = True
         return context
 
     def get_object(self):
@@ -193,7 +193,7 @@ class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 
 # Notifications views
 
-class SubscribeOnUserNotificationsView(LogMixin, LoginRequiredMixin, generic.View):
+class SubscribeOnUserNotificationsView(LoginRequiredMixin, LogMixin, generic.View):
 
     def post(self, *args, **kwargs):
         if not self.request.user.subscriber.filter(author__username=self.request.POST.get('author')):
@@ -204,7 +204,7 @@ class SubscribeOnUserNotificationsView(LogMixin, LoginRequiredMixin, generic.Vie
         return HttpResponseRedirect('/')
 
 
-class UnSubscribeOnUserNotificationsView(LogMixin, LoginRequiredMixin, generic.DeleteView):
+class UnSubscribeOnUserNotificationsView(LoginRequiredMixin, LogMixin, generic.DeleteView):
     model = AuthorsSubscriber
     success_url = '/'
 
@@ -215,7 +215,7 @@ class UnSubscribeOnUserNotificationsView(LogMixin, LoginRequiredMixin, generic.D
                                  )
 
 
-class NotificationsListView(LogMixin, LoginRequiredMixin, generic.ListView):
+class NotificationsListView(LoginRequiredMixin, LogMixin, generic.ListView):
     model = NewPostNotification
     context_object_name = 'notifications'
     template_name = 'engine/notifications.html'
@@ -224,7 +224,7 @@ class NotificationsListView(LogMixin, LoginRequiredMixin, generic.ListView):
         return self.model.objects.filter(authors_subscriber__subscriber=self.request.user).order_by('-date')[0:50]
 
 
-class NotificationsCountView(LogMixin, LoginRequiredMixin, generic.View):
+class NotificationsCountView(LoginRequiredMixin, generic.View):
 
     def post(self, *args, **kwargs):
         notifications = NewPostNotification.objects.filter(
@@ -234,7 +234,7 @@ class NotificationsCountView(LogMixin, LoginRequiredMixin, generic.View):
         return HttpResponse(notifications)
 
 
-class NotificationViewedView(StaffRequiredMixin, LogMixin, generic.UpdateView):
+class NotificationViewedView(LoginRequiredMixin, LogMixin, generic.UpdateView):
     model = NewPostNotification
     fields = ['status']
     success_url = "/"
@@ -253,7 +253,7 @@ class NotificationViewedView(StaffRequiredMixin, LogMixin, generic.UpdateView):
         return self.get(self, *args, **kwargs)
 
 
-class NotificationDeleteView(LogMixin, generic.DeleteView):
+class NotificationDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
     model = NewPostNotification
     success_url = '/'
 

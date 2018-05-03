@@ -17,10 +17,12 @@
                         <p>Contact - {{ user.email }}</p>
 
                         {% if request.user.is_authenticated %}
-                            {% if subscribe %}
-                                <br><br><a href="#" onclick="AjaxUnSubscribeOnAuthor('{{ user }}');return false" id="subscribe">Unsubscribe on {{ user }} updates</a><br><br>
-                            {% else %}
-                                <br><br><a href="#" onclick="AjaxSubscribeOnAuthor('{{ user }}');return false" id="subscribe">Subscribe on {{ user }} updates</a><br><br>
+                            {% if user != request.user %}
+                                {% if subscribe %}
+                                    <br><br><a href="#" onclick="AjaxUnSubscribeOnAuthor('{{ user }}');return false" id="subscribe">Unsubscribe from {{ user }} updates</a><br><br>
+                                {% else %}
+                                    <br><br><a href="#" onclick="AjaxSubscribeOnAuthor('{{ user }}');return false" id="subscribe">Subscribe to {{ user }} updates</a><br><br>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
 
@@ -54,7 +56,7 @@
                 author: author
             },
             success: function(){
-                $('#subscribe').html("Unsubscribe on {{ user }} updates");
+                $('#subscribe').html("Unsubscribe from {{ user }} updates");
                 $('#subscribe').attr('onclick', "AjaxUnSubscribeOnAuthor('{{ user }}')");
             }
         });
@@ -68,7 +70,7 @@
                 author: author
             },
             success: function(){
-                $('#subscribe').html("Subscribe on {{ user }} updates");
+                $('#subscribe').html("Subscribe to {{ user }} updates");
                 $('#subscribe').attr('onclick', "AjaxSubscribeOnAuthor('{{ user }}')");
             }
         });
