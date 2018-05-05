@@ -79,7 +79,7 @@ def create_post(sender, instance, created, **kwargs):
     if created:
         subscribers = AuthorSubscriber.objects.filter(author__username=instance.author)
         for subscriber in subscribers:
-            AuthorSubscriberNotification.objects.create(author_subscriber=subscriber, post=instance)
+            Notification.objects.create(author_subscriber=subscriber, post=instance)
 
 
 @receiver(signals.post_save, sender=Comment)
@@ -87,7 +87,7 @@ def create_comment(sender, instance, created, **kwargs):
     if created:
         subscribers = PostSubscriber.objects.filter(post__pk=instance.post.pk)
         for subscriber in subscribers:
-            PostSubscriberNotification.objects.create(post_subscriber=subscriber, comment=instance)
+            Notification.objects.create(post_subscriber=subscriber, comment=instance)
 
 
 class AuthorSubscriber(models.Model):
@@ -100,16 +100,24 @@ class PostSubscriber(models.Model):
     subscriber = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='post_subscriber')
 
 
-class AuthorSubscriberNotification(models.Model):
-    author_subscriber = models.ForeignKey(AuthorSubscriber, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+class Notification(models.Model):
+    author_subscriber = models.ForeignKey(AuthorSubscriber, on_delete=models.CASCADE, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
+    post_subscriber = models.ForeignKey(PostSubscriber, on_delete=models.CASCADE, null=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True)
     status = models.BooleanField(default=False)
 
 
-class PostSubscriberNotification(models.Model):
-    post_subscriber = models.ForeignKey(PostSubscriber, on_delete=models.CASCADE)
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
-    status = models.BooleanField(default=False)
+# class AuthorSubscriberNotification(models.Model):
+#     author_subscriber = models.ForeignKey(AuthorSubscriber, on_delete=models.CASCADE)
+#     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+#     status = models.BooleanField(default=False)
+#
+#
+# class PostSubscriberNotification(models.Model):
+#     post_subscriber = models.ForeignKey(PostSubscriber, on_delete=models.CASCADE)
+#     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+#     status = models.BooleanField(default=False)
 
 
 class Feedback(models.Model):

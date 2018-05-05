@@ -19,7 +19,8 @@ from engine.serializers import *
 # fix password_reset_confirm
 # архив, модерация постов для всего сайта, загрузка картинок, убрать логи, добавить кеширование
 
-# union ajaxunsub & ajaxsub
+# union ajaxUnSubscription & ajaxSubscription on post and on author
+# remake NotificationListView: join 2 queries, and remake NotificationCount: also join 2 queries
 
 
 # Mixin views
@@ -234,34 +235,46 @@ class UnSubscribeFromPostNotificationsView(LoginRequiredMixin, LogMixin, generic
 
 
 class NotificationsListView(LoginRequiredMixin, LogMixin, generic.ListView):
-    model = AuthorSubscriberNotification
+    model = Notification
     context_object_name = 'notifications'
     template_name = 'engine/notifications.html'
 
     def get_queryset(self):
-        return self.model.objects.filter(author_subscriber__subscriber=self.request.user).order_by('-pk')[0:50]
+        posts = self.model.objects.filter(author_subscriber__subscriber=self.request.user).order_by('-pk')
+        comments = self.model.objects.filter(post_subscriber__subscriber=self.request.user).order_by('-pk')
+        all = posts | comments
+        return all[0:100]
 
 
 class NotificationsCountView(LoginRequiredMixin, generic.View):
 
     def post(self, *args, **kwargs):
-        notifications = AuthorSubscriberNotification.objects.filter(
+        author_notifications = Notification.objects.filter(
             author_subscriber__subscriber=self.request.user,
             status=False
         ).count()
+        post_notifications = Notification.objects.filter(
+            post_subscriber__subscriber=self.request.user,
+            status=False
+        ).count()
+        notifications = author_notifications + post_notifications
         return HttpResponse(notifications)
 
 
 class NotificationViewedView(LoginRequiredMixin, LogMixin, generic.UpdateView):
-    model = AuthorSubscriberNotification
+    model = Notification
     fields = ['status']
     success_url = "/"
     template_name = "engine/base.html"
 
     def get_object(self, queryset=None):
-        owner = get_object_or_404(AuthorSubscriberNotification, pk=self.request.POST.get("pk")).author_subscriber.subscriber.username
+        notification = get_object_or_404(Notification, pk=self.request.POST.get("pk"))
+        if notification.post:
+            owner = notification.author_subscriber.subscriber.username
+        if notification.comment:
+            owner = notification.post_subscriber.subscriber.username
         if owner == self.request.user.username:
-            return get_object_or_404(self.model, pk=self.request.POST.get('pk'))
+            return notification
         return HttpResponseForbidden()
 
     def post(self, *args, **kwargs):
@@ -272,13 +285,17 @@ class NotificationViewedView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 
 
 class NotificationDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
-    model = AuthorSubscriberNotification
+    model = Notification
     success_url = '/'
 
     def get_object(self, queryset=None):
-        owner = get_object_or_404(AuthorSubscriberNotification, pk=self.request.POST.get("pk")).author_subscriber.subscriber.username
+        notification = get_object_or_404(Notification, pk=self.request.POST.get("pk"))
+        if notification.post:
+            owner = notification.author_subscriber.subscriber.username
+        if notification.comment:
+            owner = notification.post_subscriber.subscriber.username
         if owner == self.request.user.username:
-            return get_object_or_404(AuthorSubscriberNotification, pk=self.request.POST.get("pk"))
+            return notification
         return HttpResponseForbidden()
 
 
