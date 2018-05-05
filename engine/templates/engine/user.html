@@ -9,7 +9,11 @@
                         <img src="{{ user.profile.img }}" style="width:40%;height:246px">
                     </div>
                     <div class="story-details story-teaser_text" style="position: relative;float:right;margin-top:-175px">
-                        <h3 class="heading-standard"><a href="{% url 'user_detail' username=user %}">{{ user|title }}{% if user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}</a></h3>
+                        <h3 class="heading-standard">
+                            <a href="{% url 'user_detail' username=user %}">
+                                {{ user|title }}{% if user.is_staff %} <i><font color="#ff5700">(Staff)</font></i>{% endif %}
+                            </a>
+                        </h3>
                         <em class="story-detail_subtitle">Joined {{ user.date_joined }} | last login {{ user.last_login }}</em>
                         <div style="width:500px">
                             <p>{{ user.profile.description|linebreaksbr }}</p>
@@ -19,9 +23,17 @@
                         {% if request.user.is_authenticated %}
                             {% if user != request.user %}
                                 {% if subscribe %}
-                                    <br><br><a href="#" onclick="AjaxUnSubscribeOnAuthor('{{ user }}');return false" id="subscribe">Unsubscribe from {{ user }} updates</a><br><br>
+                                    <br><br>
+                                    <a href="#" onclick="AjaxUnSubscribeOnAuthor('{{ user }}');return false" id="subscribe">
+                                        Unsubscribe from {{ user }} updates
+                                    </a>
+                                    <br><br>
                                 {% else %}
-                                    <br><br><a href="#" onclick="AjaxSubscribeOnAuthor('{{ user }}');return false" id="subscribe">Subscribe to {{ user }} updates</a><br><br>
+                                    <br><br>
+                                    <a href="#" onclick="AjaxSubscribeFromAuthor('{{ user }}');return false" id="subscribe">
+                                        Subscribe to {{ user }} updates
+                                    </a>
+                                    <br><br>
                                 {% endif %}
                             {% endif %}
                         {% endif %}
@@ -61,9 +73,9 @@
             }
         });
     }
-    function AjaxUnSubscribeOnAuthor(author){
+    function AjaxUnSubscribeFromAuthor(author){
         $.ajax({
-            url: "{% url 'unsubscribe_on_author' %}",
+            url: "{% url 'unsubscribe_from_author' %}",
             type: 'POST',
             data: {
                 csrfmiddlewaretoken: '{{ csrf_token }}',

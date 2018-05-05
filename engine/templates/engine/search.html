@@ -8,7 +8,12 @@
 <center>
 <div style="margin-top:100px;width:50%">
     <form method="POST" class="search-form" id="search">{% csrf_token %}
-    <input class="js-searchInput textInput textInput--jumbo textInput--underlined u-marginBottom40" type="search" id="searchText" placeholder="Search" value="{{ search_text }}" maxlength="300">
+    <input class="js-searchInput textInput textInput--jumbo textInput--underlined u-marginBottom40"
+           type="search"
+           id="searchText"
+           placeholder="Search"
+           value="{{ search_text }}"
+           maxlength="300">
     </form>
     {% if text %}<br><br>{{ text }}<br><br>{% endif %}
 </div>

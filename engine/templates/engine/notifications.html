@@ -3,10 +3,18 @@
 {% block content %}
     <div id="main" role="main">
         {% for notification in notifications %}
-            <p class="notification-item" id="{{ notification.pk }}" {% if notification.status == False %}onclick="AjaxNotificationsViewed({{ notification.pk }})"{% endif %} {% if notification.status == True %}style="color: darkgray"{% endif %}>{{ notification.date|date:"M d G:i" }}
-                User <a href="{% url 'user_detail' username=notification.authors_subscriber.author %}">{{ notification.authors_subscriber.author }}</a>
-                added post <a href="{% url "post_detail" name=notification.post.url %}">{{ notification.post.name }}</a>
-                <a href="#" style="float:right" onclick="AjaxNotificationDelete({{ notification.pk }})">X</a></p>
+            <p class="notification-item"
+               id="{{ notification.pk }}"
+               {% if notification.status == False %}onclick="AjaxNotificationsViewed({{ notification.pk }})"{% endif %}
+               {% if notification.status == True %}style="color: darkgray"{% endif %}>
+                <a href="{% url 'user_detail' username=notification.author_subscriber.author %}">
+                    {{ notification.author_subscriber.author }}
+                </a>
+                added post
+                <a href="{% url "post_detail" name=notification.post.url %}">{{ notification.post.name }}</a>
+                {{ notification.post.created_date|timesince }} ago
+                <a href="#" style="float:right" onclick="AjaxNotificationDelete({{ notification.pk }})">X</a>
+            </p>
         {% endfor %}
     </div>
     <script>

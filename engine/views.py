@@ -159,7 +159,7 @@ class UserDetailsView(LogMixin, generic.DetailView):
         context = super(UserDetailsView, self).get_context_data(**kwargs)
         context['posts'] = Post.objects.filter(author__username=self.kwargs['username'])
         if self.request.user.is_authenticated:
-            if self.request.user.subscriber.filter(author__username=self.kwargs['username']):
+            if self.request.user.author_subscriber.filter(author__username=self.kwargs['username']):
                 context['subscribe'] = True
         return context
 
@@ -196,52 +196,70 @@ class UserChangeEmailView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 class SubscribeOnUserNotificationsView(LoginRequiredMixin, LogMixin, generic.View):
 
     def post(self, *args, **kwargs):
-        if not self.request.user.subscriber.filter(author__username=self.request.POST.get('author')):
-            AuthorsSubscriber.objects.create(
+        if not self.request.user.author_subscriber.filter(author__username=self.request.POST.get('author')):
+            AuthorSubscriber.objects.create(
                 author=get_object_or_404(User, username=self.request.POST.get('author')),
                 subscriber=self.request.user
             )
         return HttpResponseRedirect('/')
 
 
-class UnSubscribeOnUserNotificationsView(LoginRequiredMixin, LogMixin, generic.DeleteView):
-    model = AuthorsSubscriber
+class UnSubscribeFromUserNotificationsView(LoginRequiredMixin, LogMixin, generic.DeleteView):
+    model = AuthorSubscriber
     success_url = '/'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(AuthorsSubscriber,
-                                 subscriber=self.request.user,
-                                 author=get_object_or_404(User, username=self.request.POST.get('author'))
-                                 )
+        return get_object_or_404(AuthorSubscriber, subscriber=self.request.user,
+                                 author=get_object_or_404(User, username=self.request.POST.get('author')))
+
+
+class SubscribeOnPostNotificationsView(LoginRequiredMixin, LogMixin, generic.View):
+
+    def post(self, *args, **kwargs):
+        if not self.request.user.post_subscriber.filter(post__pk=self.request.POST.get('pk')):
+            PostSubscriber.objects.create(
+                post=get_object_or_404(Post, pk=self.request.POST.get('pk')),
+                subscriber=self.request.user
+            )
+        return HttpResponseRedirect('/')
+
+
+class UnSubscribeFromPostNotificationsView(LoginRequiredMixin, LogMixin, generic.DeleteView):
+    model = PostSubscriber
+    success_url = '/'
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(PostSubscriber, subscriber=self.request.user,
+                                 post=get_object_or_404(Post, pk=self.request.POST.get('pk')))
 
 
 class NotificationsListView(LoginRequiredMixin, LogMixin, generic.ListView):
-    model = NewPostNotification
+    model = AuthorSubscriberNotification
     context_object_name = 'notifications'
     template_name = 'engine/notifications.html'
 
     def get_queryset(self):
-        return self.model.objects.filter(authors_subscriber__subscriber=self.request.user).order_by('-date')[0:50]
+        return self.model.objects.filter(author_subscriber__subscriber=self.request.user).order_by('-pk')[0:50]
 
 
 class NotificationsCountView(LoginRequiredMixin, generic.View):
 
     def post(self, *args, **kwargs):
-        notifications = NewPostNotification.objects.filter(
-            authors_subscriber__subscriber=self.request.user,
+        notifications = AuthorSubscriberNotification.objects.filter(
+            author_subscriber__subscriber=self.request.user,
             status=False
         ).count()
         return HttpResponse(notifications)
 
 
 class NotificationViewedView(LoginRequiredMixin, LogMixin, generic.UpdateView):
-    model = NewPostNotification
+    model = AuthorSubscriberNotification
     fields = ['status']
     success_url = "/"
     template_name = "engine/base.html"
 
     def get_object(self, queryset=None):
-        owner = NewPostNotification.objects.get(pk=self.request.POST.get("pk")).authors_subscriber.subscriber.username
+        owner = get_object_or_404(AuthorSubscriberNotification, pk=self.request.POST.get("pk")).author_subscriber.subscriber.username
         if owner == self.request.user.username:
             return get_object_or_404(self.model, pk=self.request.POST.get('pk'))
         return HttpResponseForbidden()
@@ -254,13 +272,13 @@ class NotificationViewedView(LoginRequiredMixin, LogMixin, generic.UpdateView):
 
 
 class NotificationDeleteView(LoginRequiredMixin, LogMixin, generic.DeleteView):
-    model = NewPostNotification
+    model = AuthorSubscriberNotification
     success_url = '/'
 
     def get_object(self, queryset=None):
-        owner = NewPostNotification.objects.get(pk=self.request.POST.get("pk")).authors_subscriber.subscriber.username
+        owner = get_object_or_404(AuthorSubscriberNotification, pk=self.request.POST.get("pk")).author_subscriber.subscriber.username
         if owner == self.request.user.username:
-            return get_object_or_404(NewPostNotification, pk=self.request.POST.get("pk"))
+            return get_object_or_404(AuthorSubscriberNotification, pk=self.request.POST.get("pk"))
         return HttpResponseForbidden()
 
 
@@ -382,6 +400,9 @@ class PostDetailsView(LogMixin, generic.DetailView):
         time = floor(len(post.text_big) * 0.075 / 60) + 1  # move to models
         context['read_time'] = time
         context['user'] = self.request.user
+        if self.request.user.is_authenticated:
+            if self.request.user.post_subscriber.filter(post__pk=post.pk):
+                context['subscribe'] = True
         return context
 
     def get_object(self):

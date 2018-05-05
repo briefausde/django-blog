@@ -64,23 +64,51 @@ class Post(models.Model):
         return self.name
 
 
+class Comment(models.Model):
+    author = models.ForeignKey('auth.User')
+    text = models.TextField()
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.text
+
+
 @receiver(signals.post_save, sender=Post)
 def create_post(sender, instance, created, **kwargs):
     if created:
-        subscribers = AuthorsSubscriber.objects.filter(author__username=instance.author)
+        subscribers = AuthorSubscriber.objects.filter(author__username=instance.author)
         for subscriber in subscribers:
-            NewPostNotification.objects.create(authors_subscriber=subscriber, post=instance)
+            AuthorSubscriberNotification.objects.create(author_subscriber=subscriber, post=instance)
 
 
-class AuthorsSubscriber(models.Model):
-    author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='author')
-    subscriber = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='subscriber')
+@receiver(signals.post_save, sender=Comment)
+def create_comment(sender, instance, created, **kwargs):
+    if created:
+        subscribers = PostSubscriber.objects.filter(post__pk=instance.post.pk)
+        for subscriber in subscribers:
+            PostSubscriberNotification.objects.create(post_subscriber=subscriber, comment=instance)
 
 
-class NewPostNotification(models.Model):
-    authors_subscriber = models.ForeignKey(AuthorsSubscriber, on_delete=models.CASCADE)
+class AuthorSubscriber(models.Model):
+    author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='author_author')
+    subscriber = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='author_subscriber')
+
+
+class PostSubscriber(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_post')
+    subscriber = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='post_subscriber')
+
+
+class AuthorSubscriberNotification(models.Model):
+    author_subscriber = models.ForeignKey(AuthorSubscriber, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    date = models.DateTimeField(default=timezone.now)
+    status = models.BooleanField(default=False)
+
+
+class PostSubscriberNotification(models.Model):
+    post_subscriber = models.ForeignKey(PostSubscriber, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     status = models.BooleanField(default=False)
 
 
@@ -204,16 +232,6 @@ class Log(models.Model):
         if self.data:
             data = " data: " + self.data
         return "[" + str(self.date) + "] " + self.author + " (" + self.ip + ") " + self.method + " " + self.path + data
-
-
-class Comment(models.Model):
-    author = models.ForeignKey('auth.User', default="Anonymouse")
-    text = models.TextField()
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.text
 
 
 class EngineSitemap(Sitemap):
