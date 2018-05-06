@@ -1,7 +1,7 @@
 {% load staticfiles %}
 <html lang="ru">
 	<head>
-		<link href="{% static 'css/style.css' %}" rel='stylesheet' type='text/css' />
+        <link href="{% static 'css/style.css' %}" rel='stylesheet' type='text/css' />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		{% if post %}
 		<title>{{ post.name }}</title>
@@ -12,28 +12,16 @@
 		{% else %}
 		<title>Local host</title>
         {% endif %}
-		<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script></script>
+		<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
   		<link rel="stylesheet" href="{% static 'css/main.css' %}">
-		<script src="{% static 'js/jquery.min.js' %}"></script>
-         <script type="text/javascript">
-			var $ = jQuery.noConflict();
-				$(function() {
-					$('#activator').click(function(){
-						$('#box').animate({'top':'0px'},500);
-					});
-					$('#boxclose').click(function(){
-					$('#box').animate({'top':'-700px'},500);
-					});
-				});
-				$(document).ready(function(){
-				$(".toggle_container").hide();
-				$(".trigger").click(function(){
-					$(this).toggleClass("active").next().slideToggle("slow");
-						return false;
-				});
-			});
-		</script>
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script>
+            var tokens = {
+              csrf_token : "{{ csrf_token }}"
+            };
+        </script>
+        <script src="{% static 'js/ajax.js' %}"></script>
 	</head>
 	<body>
 
@@ -74,23 +62,9 @@
 		    })(jQuery);
 
             {% if request.user.is_authenticated %}
-		    function AjaxNotificationsCount(){
-                $.ajax({
-                    url: "{% url 'notifications_count' %}",
-                    type: 'POST',
-                    data: {
-                        csrfmiddlewaretoken: '{{ csrf_token }}',
-                    },
-                    success: function(html){
-                        if (html > 0) {
-                            $('#notifications').html(html);
-                        }
-                    }
-                });
-            }
             $(document).ready(function(){
-                AjaxNotificationsCount();
-                setInterval('AjaxNotificationsCount()', 10000);
+                notifications_count();
+                setInterval('notifications_count()', 10000);
             });
             {% endif %}
     </script>

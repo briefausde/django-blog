@@ -6,7 +6,7 @@
             {% if notification.post %}
                 <p class="notification-item"
                    id="{{ notification.pk }}"
-                   {% if notification.status == False %}onclick="AjaxNotificationsViewed({{ notification.pk }})"{% endif %}
+                   {% if notification.status == False %}onclick="notifications_viewed({{ notification.pk }})"{% endif %}
                    {% if notification.status == True %}style="color: darkgray"{% endif %}>
                     <a href="{% url 'user_detail' username=notification.author_subscriber.author %}">
                         {{ notification.author_subscriber.author }}
@@ -14,13 +14,13 @@
                     added post
                     <a href="{% url "post_detail" name=notification.post.url %}">{{ notification.post.name }}</a>
                     {{ notification.post.created_date|timesince }} ago
-                    <a href="#" style="float:right" onclick="AjaxNotificationDelete({{ notification.pk }})">X</a>
+                    <a href="#" style="float:right" onclick="notification_delete({{ notification.pk }})">X</a>
                 </p>
             {% endif %}
             {% if notification.comment %}
                 <p class="notification-item"
                    id="{{ notification.pk }}"
-                   {% if notification.status == False %}onclick="AjaxNotificationsViewed({{ notification.pk }})"{% endif %}
+                   {% if notification.status == False %}onclick="notifications_viewed({{ notification.pk }})"{% endif %}
                    {% if notification.status == True %}style="color: darkgray"{% endif %}>
                     <a href="{% url 'user_detail' username=notification.comment.author %}">
                         {{ notification.comment.author }}
@@ -28,39 +28,9 @@
                     added comment "{{ notification.comment.text|truncatechars:50 }}" to
                     <a href="{% url "post_detail" name=notification.comment.post.url %}">{{ notification.comment.post.name }}</a>
                     {{ notification.comment.created_date|timesince }} ago
-                    <a href="#" style="float:right" onclick="AjaxNotificationDelete({{ notification.pk }})">X</a>
+                    <a href="#" style="float:right" onclick="notification_delete({{ notification.pk }})">X</a>
                 </p>
             {% endif %}
         {% endfor %}
     </div>
-    <script>
-    function AjaxNotificationsViewed(pk){
-        $.ajax({
-            url: "{% url 'notification_viewed' %}",
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                pk: pk
-            },
-            success: function() {
-                $('#' + pk).css('color', 'darkgray');
-                AjaxNotificationsCount();
-            }
-        });
-    }
-    function AjaxNotificationDelete(pk){
-        $.ajax({
-            url: "{% url 'notification_delete' %}",
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                pk: pk
-            },
-            success: function() {
-                $('#' + pk).remove();
-                AjaxNotificationsCount();
-            }
-        });
-    }
-    </script>
 {% endblock %}

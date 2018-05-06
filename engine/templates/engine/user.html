@@ -24,13 +24,13 @@
                             {% if user != request.user %}
                                 {% if subscribe %}
                                     <br><br>
-                                    <a href="#" onclick="AjaxUnSubscribeOnAuthor('{{ user }}');return false" id="subscribe">
+                                    <a href="#" onclick="unsubscribe_from_author('{{ user }}');return false" id="subscribe">
                                         Unsubscribe from {{ user }} updates
                                     </a>
                                     <br><br>
                                 {% else %}
                                     <br><br>
-                                    <a href="#" onclick="AjaxSubscribeFromAuthor('{{ user }}');return false" id="subscribe">
+                                    <a href="#" onclick="subscribe_on_author('{{ user }}');return false" id="subscribe">
                                         Subscribe to {{ user }} updates
                                     </a>
                                     <br><br>
@@ -57,35 +57,4 @@
         </div>
     {% endif %}
     </div>
-
-    <script>
-    function AjaxSubscribeOnAuthor(author){
-        $.ajax({
-            url: "{% url 'subscribe_on_author' %}",
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                author: author
-            },
-            success: function(){
-                $('#subscribe').html("Unsubscribe from {{ user }} updates");
-                $('#subscribe').attr('onclick', "AjaxUnSubscribeOnAuthor('{{ user }}')");
-            }
-        });
-    }
-    function AjaxUnSubscribeFromAuthor(author){
-        $.ajax({
-            url: "{% url 'unsubscribe_from_author' %}",
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                author: author
-            },
-            success: function(){
-                $('#subscribe').html("Subscribe to {{ user }} updates");
-                $('#subscribe').attr('onclick', "AjaxSubscribeOnAuthor('{{ user }}')");
-            }
-        });
-    }
-    </script>
 {% endblock %}

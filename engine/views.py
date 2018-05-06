@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.template.context_processors import csrf
 from django.views import generic
@@ -249,15 +250,9 @@ class NotificationsListView(LoginRequiredMixin, LogMixin, generic.ListView):
 class NotificationsCountView(LoginRequiredMixin, generic.View):
 
     def post(self, *args, **kwargs):
-        author_notifications = Notification.objects.filter(
-            author_subscriber__subscriber=self.request.user,
-            status=False
+        notifications = Notification.objects.filter(status=False).filter(
+            Q(post_subscriber__subscriber=self.request.user) | Q(author_subscriber__subscriber=self.request.user)
         ).count()
-        post_notifications = Notification.objects.filter(
-            post_subscriber__subscriber=self.request.user,
-            status=False
-        ).count()
-        notifications = author_notifications + post_notifications
         return HttpResponse(notifications)
 
 

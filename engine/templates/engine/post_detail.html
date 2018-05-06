@@ -25,11 +25,11 @@
            			<h2>Comments</h2>
                     {% if request.user.is_authenticated %}
                         {% if subscribe %}
-                            <a href="" onclick="AjaxUnSubscribeFromPost('{{ post.pk }}');return false" id="subscribe">
+                            <a href="" onclick="unsubscribe_from_post('{{ post.pk }}');return false" id="subscribe">
                                 Unsubscribe from updates
                             </a>
                         {% else %}
-                            <a href="" onclick="AjaxSubscribeOnPost('{{ post.pk }}');return false" id="subscribe">
+                            <a href="" onclick="subscribe_on_post('{{ post.pk }}');return false" id="subscribe">
                                 Subscribe on updates
                             </a>
                         {% endif %}
@@ -55,52 +55,11 @@
     </div>
 
     <script type="text/javascript">
-        function AjaxSubscribeOnPost(pk){
-            $.ajax({
-                url: "{% url 'subscribe_on_post' %}",
-                type: 'POST',
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    pk: pk
-                },
-                success: function(){
-                    $('#subscribe').html("Unsubscribe from updates");
-                    $('#subscribe').attr('onclick', "AjaxUnSubscribeFromPost('{{ post.pk }}')");
-                }
-            });
-        }
-        function AjaxUnSubscribeFromPost(pk){
-            $.ajax({
-                url: "{% url 'unsubscribe_from_post' %}",
-                type: 'POST',
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    pk: pk
-                },
-                success: function(){
-                    $('#subscribe').html("Subscribe on updates");
-                    $('#subscribe').attr('onclick', "AjaxSubscribeOnPost('{{ post.pk }}')");
-                }
-            });
-        }
         function updateComments() {
             $.ajax({
                 url: "{% url 'comments' post.pk %}",
                 success: function(html){
                     $("#comments").html(html);
-                }
-            });
-        }
-        function AjaxRemoveComment(comment_id){
-            $.ajax({
-                url: "{% url 'remove_comment' %}",
-                type: 'POST',
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    id: comment_id
-                },
-                success: function(){
-                    updateComments();
                 }
             });
         }

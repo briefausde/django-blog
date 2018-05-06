@@ -103,8 +103,10 @@ class PostSubscriber(models.Model):
 class Notification(models.Model):
     author_subscriber = models.ForeignKey(AuthorSubscriber, on_delete=models.CASCADE, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
+
     post_subscriber = models.ForeignKey(PostSubscriber, on_delete=models.CASCADE, null=True)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True)
+
     status = models.BooleanField(default=False)
 
 
