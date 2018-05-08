@@ -36,11 +36,13 @@ Go to `(url)/admin/` and log in as superuser, then select `categories` section a
 After that you can freely add material.
 
 # Feautures
-* users profiles pages;
-* static pages;
-* comments;
-* feedback page;
-* custom search engine based on inverted indexes;
-* custom create and edit pages;
-* custom notification system;
-* custom logging system.
+* Users profiles;
+* Flatpages (static pages);
+* Comments;
+* XML sitemap;
+* Simple-to-understand URL (semantic URL);
+* Feedback page;
+* Custom search engine based on inverted indexes;
+* Custom notification system (subscribe to users posts or comments);
+* Custom logging system;
+* API (via Django REST framework).

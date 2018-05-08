@@ -64,6 +64,14 @@ class Post(models.Model):
         return self.name
 
 
+@receiver(signals.post_save, sender=Post)
+def create_post(sender, instance, created, **kwargs):
+    if created:
+        subscribers = AuthorSubscriber.objects.filter(author__username=instance.author)
+        for subscriber in subscribers:
+            Notification.objects.create(author_subscriber=subscriber, post=instance)
+
+
 class Comment(models.Model):
     author = models.ForeignKey('auth.User')
     text = models.TextField()
@@ -72,14 +80,6 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
-
-
-@receiver(signals.post_save, sender=Post)
-def create_post(sender, instance, created, **kwargs):
-    if created:
-        subscribers = AuthorSubscriber.objects.filter(author__username=instance.author)
-        for subscriber in subscribers:
-            Notification.objects.create(author_subscriber=subscriber, post=instance)
 
 
 @receiver(signals.post_save, sender=Comment)

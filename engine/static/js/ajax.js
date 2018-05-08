@@ -4,16 +4,16 @@ var $ = jQuery.noConflict();
             $('#box').animate({'top':'0px'},500);
         });
         $('#boxclose').click(function(){
-        $('#box').animate({'top':'-700px'},500);
+            $('#box').animate({'top':'-700px'},500);
         });
     });
     $(document).ready(function(){
-    $(".toggle_container").hide();
-    $(".trigger").click(function(){
-        $(this).toggleClass("active").next().slideToggle("slow");
-            return false;
+        $(".toggle_container").hide();
+        $(".trigger").click(function(){
+            $(this).toggleClass("active").next().slideToggle("slow");
+                return false;
+        });
     });
-});
 
 function unsubscribe_from_author(author){
     // var author = $(this).data('author');
@@ -84,7 +84,7 @@ function notifications_viewed(pk){
             pk: pk
         },
         success: function() {
-            $('#' + pk).css('color', 'darkgray');
+            $('#' + pk).css('color', 'darkgray').removeAttr('onclick');
             notifications_count();
         }
     });

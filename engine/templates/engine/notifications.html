@@ -14,7 +14,7 @@
                     added post
                     <a href="{% url "post_detail" name=notification.post.url %}">{{ notification.post.name }}</a>
                     {{ notification.post.created_date|timesince }} ago
-                    <a href="#" style="float:right" onclick="notification_delete({{ notification.pk }})">X</a>
+                    <a href="" style="float:right" onclick="notification_delete({{ notification.pk }});return false;">X</a>
                 </p>
             {% endif %}
             {% if notification.comment %}
@@ -28,9 +28,10 @@
                     added comment "{{ notification.comment.text|truncatechars:50 }}" to
                     <a href="{% url "post_detail" name=notification.comment.post.url %}">{{ notification.comment.post.name }}</a>
                     {{ notification.comment.created_date|timesince }} ago
-                    <a href="#" style="float:right" onclick="notification_delete({{ notification.pk }})">X</a>
+                    <a href="" style="float:right" onclick="notification_delete({{ notification.pk }});return false;">X</a>
                 </p>
             {% endif %}
         {% endfor %}
+    <br><br><br><br>
     </div>
 {% endblock %}

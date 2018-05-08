@@ -14,14 +14,11 @@ from engine.serializers import *
 
 
 # hide user email from api and from profile
-# Js в отдельный файл и убрать из html
 # Python manage.py commands
-# Js (jQuery), databases, book, Django REST
 # fix password_reset_confirm
-# архив, модерация постов для всего сайта, загрузка картинок, убрать логи, добавить кеширование
+# архив, модерация постов для всего сайта, загрузка картинок, добавить кеширование
 
 # union ajaxUnSubscription & ajaxSubscription on post and on author
-# remake NotificationListView: join 2 queries, and remake NotificationCount: also join 2 queries
 
 
 # Mixin views
