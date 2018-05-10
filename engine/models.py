@@ -157,46 +157,25 @@ def split_str(string):
 
 class Index(models.Model):
     word = models.CharField(max_length=150)
-    index = models.TextField()
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        Index.objects.filter(pk=self.pk).update(index=','.join(str(i) for i in self.index))
-
-    def getindex(self):
-        return set(int(i.replace("{", "").replace("}", "")) for i in self.index.split(','))  # change this
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
 
     def create(self):
-        last_pk = Post.objects.order_by('-pk')[0].pk
-        indexes = {}
-        for i in range(1, last_pk + 1):
-            try:
-                post = get_object_or_404(Post, pk=i)
-                words = split_str(post.text_big + " " + post.name)
-                for word in words:
-                    if len(word) > 1:
-                        if not indexes.get(word):
-                            indexes[word] = set()
-                        indexes[word].add(post.pk)
-            except:
-                None
-        for key in indexes:
-            self.objects.create(word=key, index=indexes[key])
-            print("For {0} created index {1}".format(key, indexes[key]))
+        posts = Post.objects.all()
+        for post in posts:
+            words = split_str(post.text_big + " " + post.name)
+            for word in words:
+                if len(word) > 1:
+                    if len(self.objects.filter(word=word, post=post)) < 1:
+                        self.objects.create(word=word, post=post)
+                        print("For {0} created index {1}.".format(word, post.pk))
 
     def add(self, pk):
         post = get_object_or_404(Post, pk=pk)
         words = split_str(post.text_big + " " + post.name)
         for word in words:
             if len(word) > 1:
-                indexes = set()
-                try:
-                    indexes = get_object_or_404(self, word=word).getindex()
-                    indexes.add(pk)
-                    self.objects.filter(word=word).update(index=indexes)
-                except:
-                    indexes.add(pk)
-                    self.objects.create(word=word, index=indexes)
+                if len(self.objects.filter(word=word, post=post)) < 1:
+                    self.objects.create(word=word, post=post)
 
     def delete(self):
         self.objects.all().delete()
@@ -204,26 +183,21 @@ class Index(models.Model):
 
     def find(self, search_request):
         search_words = split_str(search_request)
-        posts = []
-        pk_list = []
+        posts_pk = []
 
         for key in search_words:
-            try:
-                pk_list.append(get_object_or_404(Index, word=key).getindex())
-            except:
+            pk_list = set([index.post.pk for index in Index.objects.filter(word=key)])
+            if pk_list:
+                posts_pk.append(pk_list)
+            else:
                 pass
 
-        if pk_list:
-            intersection_pk = pk_list[0]
-            for i in range(len(pk_list) - 1):
-                intersection_pk = set(pk_list[i]) & set(pk_list[i + 1])
-            for pk in intersection_pk:
-                try:
-                    posts.append(Post.objects.get(pk=pk))
-                except:
-                    None
-
-        return posts
+        if posts_pk:
+            intersection_pk = posts_pk[0]
+            for i in range(len(posts_pk) - 1):
+                intersection_pk = posts_pk[i] & posts_pk[i + 1]
+            return [Post.objects.get(pk=pk) for pk in intersection_pk]
+        return []
 
 
 class Log(models.Model):
