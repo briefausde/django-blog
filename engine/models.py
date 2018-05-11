@@ -58,7 +58,7 @@ class Post(models.Model):
             self.url += "-" + str(round(time.time()))
 
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        Index.add(Index, self.pk)
+        Index.add(Index, self)
 
     def __str__(self):
         return self.name
@@ -162,15 +162,11 @@ class Index(models.Model):
     def create(self):
         posts = Post.objects.all()
         for post in posts:
-            words = split_str(post.text_big + " " + post.name)
-            for word in words:
-                if len(word) > 1:
-                    if len(self.objects.filter(word=word, post=post)) < 1:
-                        self.objects.create(word=word, post=post)
-                        print("For {0} created index {1}.".format(word, post.pk))
+            self.add(self, post)
+            print("Created index for {0} ({1}).".format(post, post.pk))
+        print("All indexes created")
 
-    def add(self, pk):
-        post = get_object_or_404(Post, pk=pk)
+    def add(self, post):
         words = split_str(post.text_big + " " + post.name)
         for word in words:
             if len(word) > 1:
@@ -183,19 +179,19 @@ class Index(models.Model):
 
     def find(self, search_request):
         search_words = split_str(search_request)
-        posts_pk = []
+        posts_pk_list = []
 
-        for key in search_words:
-            pk_list = set([index.post.pk for index in Index.objects.filter(word=key)])
+        for word in search_words:
+            pk_list = set([index.post.pk for index in Index.objects.filter(word=word)])
             if pk_list:
-                posts_pk.append(pk_list)
+                posts_pk_list.append(pk_list)
             else:
                 pass
 
-        if posts_pk:
-            intersection_pk = posts_pk[0]
-            for i in range(len(posts_pk) - 1):
-                intersection_pk = posts_pk[i] & posts_pk[i + 1]
+        if posts_pk_list:
+            intersection_pk = posts_pk_list[0]
+            for posts_pk in range(len(posts_pk_list) - 1):
+                intersection_pk = posts_pk_list[posts_pk] & posts_pk_list[posts_pk + 1]
             return [Post.objects.get(pk=pk) for pk in intersection_pk]
         return []
 

@@ -84,7 +84,7 @@ urlpatterns = [
     url(r'^feedback/list/$', views.FeedbackListView.as_view(), name='feedback_list'),
     url(r'^feedback/(?P<pk>[0-9]+)/$', views.FeedbackDetailsView.as_view(), name='feedback_detail'),
     url(r'^feedback/answered/$', views.FeedbackAnsweredView.as_view(), name='feedback_answered'),
-    url(r'^notifications/list/$', views.NotificationsListView.as_view(), name='notifications_list'),
+    url(r'^notifications/$', views.NotificationsListView.as_view(), name='notifications_list'),
     url(r'^notifications/count/$', views.NotificationsCountView.as_view(), name='notifications_count'),
     url(r'^notifications/author/subscribe/$', views.SubscribeOnUserNotificationsView.as_view(),
         name='subscribe_on_author'),

@@ -409,6 +409,8 @@ class PostDetailsView(LogMixin, generic.DetailView):
         time = floor(len(post.text_big) * 0.075 / 60) + 1  # move to models
         context['read_time'] = time
         context['user'] = self.request.user
+        from django.utils.html import strip_tags
+        context['text_big'] = strip_tags(post.text_big).replace('\r\n', '<br>')
         if self.request.user.is_authenticated:
             if self.request.user.post_subscriber.filter(post__pk=post.pk):
                 context['subscribe'] = True
