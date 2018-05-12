@@ -1,14 +1,18 @@
-from re import sub
 from django.db import models
-from django.shortcuts import get_object_or_404
+from django.db.models.signals import post_save
+from django.db.models import (
+    signals,
+    F,
+)
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.sitemaps import Sitemap
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.db.models import signals
 from django.contrib.auth.models import User
+from django.dispatch import receiver
+from .utils import (
+    serialize_url,
+    split_str,
+)
 
 
 class Category(models.Model):
@@ -40,19 +44,17 @@ class Post(models.Model):
         return reverse('post_detail', args=(self.url,))
 
     def update_views(self):
-        Post.objects.filter(pk=self.pk).update(views=self.views+1)
-
-    def url_refactoring(self, url):
-        return str.lower(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', url.replace("-", " ")).replace(" ", "-"))
+        self.views = F('views') + 1
+        self.save()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         import time
         self.published_date = timezone.now()
 
         if not self.url:
-            self.url = self.url_refactoring(self.name)
+            self.url = serialize_url(self.name)
 
-        self.url = self.url_refactoring(self.url)
+        self.url = serialize_url(self.url)
 
         if Post.objects.filter(url=self.url).exclude(pk=self.pk).order_by('url'):
             self.url += "-" + str(round(time.time()))
@@ -136,7 +138,8 @@ class Feedback(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     img = models.CharField(max_length=500, default="/static/media/small_default_image.jpg", blank=True)
-    description = models.CharField(max_length=100, default="You can contact with me in mail. My mail you can see in down")
+    description = models.CharField(max_length=100,
+                                   default="You can contact with me in mail. My mail you can see in down")
 
     def __str__(self):
         return self.user.username
@@ -151,10 +154,6 @@ class Profile(models.Model):
         instance.profile.save()
 
 
-def split_str(string):
-    return set(str.upper(sub(r'[^a-zA-Zа-яА-Я0-9 ]', r'', string).replace("  ", " ")).split(" "))
-
-
 class Index(models.Model):
     word = models.CharField(max_length=150)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
@@ -163,7 +162,7 @@ class Index(models.Model):
         posts = Post.objects.all()
         for post in posts:
             self.add(self, post)
-            print("Created index for {0} ({1}).".format(post, post.pk))
+            print("Created indexes for {0} ({1}).".format(post, post.pk))
         print("All indexes created")
 
     def add(self, post):

@@ -63,6 +63,7 @@
                 }
             });
         }
+        {% if post.comments_mode %}
         function AjaxAddComment() {
             var textComment = $('#form-comment').serialize();
             $.ajax({
@@ -76,14 +77,17 @@
             $("#id_text").val('');
             $("#id_text").blur();
         }
+        {% endif %}
         $(document).ready(function(){
             updateComments();
+            {% if post.comments_mode %}
             setInterval('updateComments()', 10000);
             $("#id_text").keypress(function(e){
                 if(e.keyCode==13){
                     $("#form-comment").submit();
                 }
             });
+            {% endif %}
         });
 </script>
 {% endblock %}

@@ -38,7 +38,7 @@
                         <li><a href="{% url 'user_detail' username=request.user %}">
                             {% if request.user.profile.img %}
                                 <img src="{{ request.user.profile.img }}" width="43px" height="43px" title="{{ request.user }}" />
-                            {% endif %} {{ request.user }}</a>
+                            {% endif %} {{ request.user|title }}</a>
                             <a href="{% url 'notifications_list' %}">
                                 <img style="width:20px;height:20px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJFSURBVGhD7dpPiE1hGMfxa4YxshimSDNiYVjJQs0oFDEWUmxYWEhKFkpJkZpZzNSEWc3CSllYCTVKKQs2WJANCwuZJkUpSiwwNf7MfH/l1knPzJx7z/vnvDP3V5/Nrfu+z9O955z3vOdUPGYRruM7nqAdSaYbUxnnkGQOINvIZSSZpBtpxSk8gI6NbCO/8Az9WI3S5jg+IVv8TCZwCS0oTVTMLVgFz+UlOhE9auI+rCLzeou1iJphWMXV6jGaESXb8AdWYfU4iygp+pf630csQ9Csw19YBRVxFEFzElYhRd1A0FyDVUhRrxE0d2EVUtRnBI2W5VYhLgTNU1hFuBA0jUZyCJpGIzkETaORHIJm3jTyAlYRLixFkGyHj5Vv1Xl4Txe0HrIKcOU3DsJb1uMdrMld+4l9cB5tDozDmtSXH9gDZ1ETY7Am803N7ELhrMIbWJOEoh1LbXTUnTa8gjV4aN+wBTVnOZ7DGjQWnS03IXe0UfYI1mCxfcAa5MogrEHK4iGaMGtWQDvl1gBlcgizpgMut0F9OYI5cwHWl8tiFEuQK4cR6yI4k6+4iMWoKXr2oZ9Qm3Gxjhv9zXXvcxorUTi6ruxGH+5BD2cmYU1eL90avIdO/VegFbBWFt6jn3gj9kK76GcwgBFob1hu4s4/1c+uYgh6HnIM+6GrdvBHCgsqm9Fr2IlkonvuL7COA9mKJLIBVgNVJ5BEdNDqhshqQnYgmeg0bTWhVzv0+lMy0a2AVtHZa81tJPvOllbTPfD8ZkOlMg3vTfr+Y5gpSgAAAABJRU5ErkJggg==" title="notifications">
                                 <a href="{% url 'notifications_list' %}" id="notifications"></a>

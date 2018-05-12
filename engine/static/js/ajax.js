@@ -53,6 +53,9 @@ function notifications_count(){
             if (html > 0) {
                 $('#notifications').html(html);
             }
+            else {
+                $('#notifications').html("");
+            }
         }
     });
 }

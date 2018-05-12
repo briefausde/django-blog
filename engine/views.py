@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
+from django.shortcuts import get_object_or_404
 from django.template.context_processors import csrf
 from django.views import generic
 from django.urls import reverse_lazy
@@ -240,8 +241,8 @@ class NotificationsListView(LoginRequiredMixin, LogMixin, generic.ListView):
     def get_queryset(self):
         posts = self.model.objects.filter(author_subscriber__subscriber=self.request.user).order_by('-pk')
         comments = self.model.objects.filter(post_subscriber__subscriber=self.request.user).order_by('-pk')
-        all = posts | comments
-        return all[0:100]
+        notifications = posts | comments
+        return notifications[0:100]
 
 
 class NotificationsCountView(LoginRequiredMixin, generic.View):
@@ -417,11 +418,11 @@ class PostDetailsView(LogMixin, generic.DetailView):
         return context
 
     def get_object(self):
-        # post = Post.objects.filter(url=Post.url_refactoring(Post, self.kwargs['name'])).first()
+        # post = Post.objects.filter(url=Post.serialize_url(Post, self.kwargs['name'])).first()
         # if not post:
         #     raise Http404
         # return post
-        return get_object_or_404(Post, url=Post.url_refactoring(Post, self.kwargs['name']))
+        return get_object_or_404(Post, url=serialize_url(self.kwargs['name']))
 
 
 # Search view
