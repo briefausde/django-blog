@@ -20,6 +20,7 @@ from engine.serializers import *
 # архив, модерация постов для всего сайта, загрузка картинок, добавить кеширование
 
 # union ajaxUnSubscription & ajaxSubscription on post and on author
+# convert notifications to socket
 
 
 # Mixin views
