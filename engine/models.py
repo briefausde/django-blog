@@ -60,7 +60,7 @@ class Post(models.Model):
             self.url += "-" + str(round(time.time()))
 
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        Index.add(Index, self)
+        Index.add(self)
 
     def __str__(self):
         return self.name
@@ -132,7 +132,7 @@ class Feedback(models.Model):
     status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.subject + " - " + self.email
+        return "{} - {}".format(self.subject, self.email)
 
 
 class Profile(models.Model):
@@ -165,18 +165,20 @@ class Index(models.Model):
             print("Created indexes for {0} ({1}).".format(post, post.pk))
         print("All indexes created")
 
-    def add(self, post):
+    @classmethod
+    def add(cls, post):
         words = split_str(post.text_big + " " + post.name)
         for word in words:
             if len(word) > 1:
-                if len(self.objects.filter(word=word, post=post)) < 1:
-                    self.objects.create(word=word, post=post)
+                if len(cls.objects.filter(word=word, post=post)) < 1:
+                    cls.objects.create(word=word, post=post)
 
     def delete(self):
         self.objects.all().delete()
         print("All indexes deleted")
 
-    def find(self, search_request):
+    @staticmethod
+    def find(search_request):
         search_words = split_str(search_request)
         posts_pk_list = []
 
@@ -203,14 +205,11 @@ class Log(models.Model):
     body = models.TextField()
     cookies = models.TextField()
     meta = models.TextField()
-    data = models.TextField(default="")
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        data = ""
-        if self.data:
-            data = " data: " + self.data
-        return "[" + str(self.date) + "] " + self.author + " (" + self.ip + ") " + self.method + " " + self.path + data
+        LOG_FORMAT = "[{}] {} ({}) {} {}"
+        return LOG_FORMAT.format(str(self.date), self.author, self.ip, self.method, self.path)
 
 
 class EngineSitemap(Sitemap):
@@ -219,8 +218,10 @@ class EngineSitemap(Sitemap):
     def items(self):
         return Post.objects.all()
 
-    def lastmod(self, obj):
+    @staticmethod
+    def lastmod(obj):
         return obj.published_date
 
-    def changefreq(self, obj):
+    @staticmethod
+    def changefreq(obj):
         return "daily" if obj.comments_mode else "never"

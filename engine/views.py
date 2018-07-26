@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
@@ -326,8 +327,12 @@ class CommentDeleteView(AuthorRequiredMixin, LogMixin, generic.DeleteView):
 
 # Posts views
 
-class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
+class PostMixin:
     form_class = PostForm
+    model = Post
+
+
+class PostCreateView(PostMixin, LoginRequiredMixin, LogMixin, generic.CreateView):
     template_name = 'engine/form_default.html'
 
     def get_context_data(self, **kwargs):
@@ -340,9 +345,7 @@ class PostCreateView(LoginRequiredMixin, LogMixin, generic.CreateView):
         return super(PostCreateView, self).form_valid(form)
 
 
-class PostEditView(AuthorRequiredMixin, LogMixin, generic.UpdateView):
-    model = Post
-    form_class = PostForm
+class PostEditView(PostMixin, AuthorRequiredMixin, LogMixin, generic.UpdateView):
     template_name = 'engine/form_default.html'
 
     def get_context_data(self, **kwargs):
@@ -354,8 +357,7 @@ class PostEditView(AuthorRequiredMixin, LogMixin, generic.UpdateView):
         return reverse('post_detail', args=(self.object.url,))
 
 
-class PostDeleteView(AuthorRequiredMixin, LogMixin, generic.DeleteView):
-    model = Post
+class PostDeleteView(PostMixin, AuthorRequiredMixin, LogMixin, generic.DeleteView):
     success_url = '/'
 
     def post(self, request, *args, **kwargs):
@@ -373,8 +375,7 @@ class PostDeleteView(AuthorRequiredMixin, LogMixin, generic.DeleteView):
 
 # Main page
 
-class PostsListView(LogMixin, generic.ListView):
-    model = Post
+class PostsListView(PostMixin, LogMixin, generic.ListView):
     context_object_name = 'posts'
     template_name = 'engine/post_list.html'
 
@@ -398,8 +399,7 @@ class PostsListView(LogMixin, generic.ListView):
         return context
 
 
-class PostDetailsView(LogMixin, generic.DetailView):
-    model = Post
+class PostDetailsView(PostMixin, LogMixin, generic.DetailView):
     context_object_name = 'post'
     template_name = 'engine/post_detail.html'
 
@@ -441,7 +441,7 @@ class SearchListView(LogMixin, generic.ListView):
         if (len(word) < 3) or (len(word) > 120):
             context['text'] = "Search query should be from 3 to 120 characters"
         else:
-            posts = Index.find(Index, word)
+            posts = Index.find(word)
             if posts:
                 self.template_name = "engine/post_list.html"
                 context['posts'] = paginator(posts, self.request.GET.get('pk', 1), 15)
