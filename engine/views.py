@@ -1,5 +1,5 @@
+from math import floor
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
@@ -7,6 +7,7 @@ from django.template.context_processors import csrf
 from django.views import generic
 from django.urls import reverse_lazy
 from engine.utils import paginator
+from django.utils.html import strip_tags
 from .forms import *
 from .models import *
 
@@ -15,13 +16,9 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
 from engine.serializers import *
 
 
-# hide user email from api and from profile
-# Python manage.py commands
-# fix password_reset_confirm
-# архив, модерация постов для всего сайта, загрузка картинок, добавить кеширование
-
-# union ajaxUnSubscription & ajaxSubscription on post and on author
-# convert notifications to socket
+# TODO hide user email from api and from profile
+# TODO fix password_reset_confirm, post moderation, images upload
+# TODO convert notifications to socket
 
 
 # Mixin views
@@ -407,11 +404,9 @@ class PostDetailsView(PostMixin, LogMixin, generic.DetailView):
         post = self.get_object()
         post.update_views()
         context = super(PostDetailsView, self).get_context_data()
-        from math import floor
         time = floor(len(post.text_big) * 0.075 / 60) + 1  # move to models
         context['read_time'] = time
         context['user'] = self.request.user
-        from django.utils.html import strip_tags
         context['text_big'] = strip_tags(post.text_big).replace('\r\n', '<br>')
         if self.request.user.is_authenticated:
             if self.request.user.post_subscriber.filter(post__pk=post.pk):

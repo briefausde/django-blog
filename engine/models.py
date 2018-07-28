@@ -1,9 +1,5 @@
+import time
 from django.db import models
-from django.db.models.signals import post_save
-from django.db.models import (
-    signals,
-    F,
-)
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.sitemaps import Sitemap
@@ -44,29 +40,28 @@ class Post(models.Model):
         return reverse('post_detail', args=(self.url,))
 
     def update_views(self):
-        self.views = F('views') + 1
+        self.views = models.F('views') + 1
         self.save()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        import time
         self.published_date = timezone.now()
 
-        if not self.url:
+        if self.url:
+            self.url = serialize_url(self.url)
+        else:
             self.url = serialize_url(self.name)
-
-        self.url = serialize_url(self.url)
 
         if Post.objects.filter(url=self.url).exclude(pk=self.pk).order_by('url'):
             self.url += "-" + str(round(time.time()))
 
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        Index.add(self)
+        Index.add(self)  # here self is Post instance
 
     def __str__(self):
         return self.name
 
 
-@receiver(signals.post_save, sender=Post)
+@receiver(models.signals.post_save, sender=Post)
 def create_post(sender, instance, created, **kwargs):
     if created:
         subscribers = AuthorSubscriber.objects.filter(author__username=instance.author)
@@ -84,7 +79,7 @@ class Comment(models.Model):
         return self.text
 
 
-@receiver(signals.post_save, sender=Comment)
+@receiver(models.signals.post_save, sender=Comment)
 def create_comment(sender, instance, created, **kwargs):
     if created:
         subscribers = PostSubscriber.objects.filter(post__pk=instance.post.pk)
@@ -112,18 +107,6 @@ class Notification(models.Model):
     status = models.BooleanField(default=False)
 
 
-# class AuthorSubscriberNotification(models.Model):
-#     author_subscriber = models.ForeignKey(AuthorSubscriber, on_delete=models.CASCADE)
-#     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-#     status = models.BooleanField(default=False)
-#
-#
-# class PostSubscriberNotification(models.Model):
-#     post_subscriber = models.ForeignKey(PostSubscriber, on_delete=models.CASCADE)
-#     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
-#     status = models.BooleanField(default=False)
-
-
 class Feedback(models.Model):
     email = models.EmailField()
     subject = models.CharField(max_length=60)
@@ -144,12 +127,12 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-    @receiver(post_save, sender=User)
+    @receiver(models.signals.post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
             Profile.objects.create(user=instance)
 
-    @receiver(post_save, sender=User)
+    @receiver(models.signals.post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
         instance.profile.save()
 
@@ -208,8 +191,8 @@ class Log(models.Model):
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        LOG_FORMAT = "[{}] {} ({}) {} {}"
-        return LOG_FORMAT.format(str(self.date), self.author, self.ip, self.method, self.path)
+        FMT_LOG = "[{}] {} ({}) {} {}"
+        return FMT_LOG.format(str(self.date), self.author, self.ip, self.method, self.path)
 
 
 class EngineSitemap(Sitemap):
