@@ -197,7 +197,7 @@ class SubscribeOnUserNotificationsView(LoginRequiredMixin, LogMixin, generic.Vie
     def post(self, *args, **kwargs):
         if not self.request.user.author_subscriber.filter(author__username=self.request.POST.get('author')):
             AuthorSubscriber.objects.create(
-                author=get_object_or_404(User, username=self.request.POST.get('author')),
+                author__username=self.request.POST.get('author'),
                 subscriber=self.request.user
             )
         return HttpResponseRedirect('/')
@@ -209,7 +209,7 @@ class UnSubscribeFromUserNotificationsView(LoginRequiredMixin, LogMixin, generic
 
     def get_object(self, queryset=None):
         return get_object_or_404(AuthorSubscriber, subscriber=self.request.user,
-                                 author=get_object_or_404(User, username=self.request.POST.get('author')))
+                                 author__username=self.request.POST.get('author'))
 
 
 class SubscribeOnPostNotificationsView(LoginRequiredMixin, LogMixin, generic.View):
@@ -217,7 +217,7 @@ class SubscribeOnPostNotificationsView(LoginRequiredMixin, LogMixin, generic.Vie
     def post(self, *args, **kwargs):
         if not self.request.user.post_subscriber.filter(post__pk=self.request.POST.get('pk')):
             PostSubscriber.objects.create(
-                post=get_object_or_404(Post, pk=self.request.POST.get('pk')),
+                post__pk=self.request.POST.get('pk'),
                 subscriber=self.request.user
             )
         return HttpResponseRedirect('/')
@@ -229,7 +229,7 @@ class UnSubscribeFromPostNotificationsView(LoginRequiredMixin, LogMixin, generic
 
     def get_object(self, queryset=None):
         return get_object_or_404(PostSubscriber, subscriber=self.request.user,
-                                 post=get_object_or_404(Post, pk=self.request.POST.get('pk')))
+                                 post__pk=self.request.POST.get('pk'))
 
 
 class NotificationsListView(LoginRequiredMixin, LogMixin, generic.ListView):
@@ -414,10 +414,6 @@ class PostDetailsView(PostMixin, LogMixin, generic.DetailView):
         return context
 
     def get_object(self):
-        # post = Post.objects.filter(url=Post.serialize_url(Post, self.kwargs['name'])).first()
-        # if not post:
-        #     raise Http404
-        # return post
         return get_object_or_404(Post, url=serialize_url(self.kwargs['name']))
 
 
